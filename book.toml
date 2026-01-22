@@ -15,6 +15,7 @@ git-repository-url = "https://github.com/NilPointer-Software/bdfd-wiki"
 edit-url-template = "https://github.com/NilPointer-Software/bdfd-wiki/edit/dev/{path}"
 no-section-label = true
 input-404 = "404.md"
+
 site-url = "/"
 additional-css = ["./src/theme/mdbook-admonish.css"]
 
