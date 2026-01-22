@@ -6,5 +6,5 @@
 
 - [Color](./tools/color.md)
 - [Text Editor](./tools/editor.md)
-- [Permission Calculator](https://botdesignerdiscord.com/tools/permission-calculator)
+- [Permission Calculator](./permissionscalculator.md)
 - [Timestamp Converter](./tools/timestamp.md)
