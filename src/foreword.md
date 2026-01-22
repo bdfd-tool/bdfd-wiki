@@ -4,8 +4,9 @@
   <h1 id="bdfd-case">Community Tools</h1>
   <p id="bdfd-about">Here you can find useful things for a pleasant BDFD coding experience.</p>
   <div class="homeButtons">
-    <button class="getHelp">
-      <p><a href="https://discord.gg/bot-designer-for-discord-official-server-566363823137882154"><i class="fa fa-comments" aria-hidden="true"></i> Join Discord</a></p>
+    <button class="backWiki">
+      <p><a href="https://wiki.botdesignerdiscord.com/"><i class="fa fa-comments" aria-hidden="true"></i> Back to wiki</a></p>
     </button>
   </div>
+
 </div>
