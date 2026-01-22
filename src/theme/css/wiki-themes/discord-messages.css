@@ -1,4 +1,4 @@
-.discord-message .discord-message-markup {
+.discord-message .discord-message-markup, .discord-system-message {
     font-size: 16px !important;
 }
 
@@ -7,18 +7,20 @@
 }
 
 .discord-messages {
+    overflow: hidden;
     border-radius: 10px;
     background-color: #2e3035;
+    border-width: 0px;
     box-shadow: 2.5px 2.5px 10px rgb(0 0 0 / 50%);
 }
 
 @media only screen and (max-width: 768px) {
-    .discord-message .discord-message-timestamp {
+    .discord-message .discord-message-timestamp, .discord-system-message .discord-message-timestamp  {
         font-size: 10px;
     }
 }
 
-.discord-message .discord-message-timestamp {
+.discord-message .discord-message-timestamp, .discord-system-message .discord-message-timestamp  {
     user-select: none;
     -webkit-user-select: none;
     color: #999;
@@ -48,7 +50,7 @@
     text-transform: uppercase;
     display: flex;
     align-items: center;
-    height: 0.9375rem;
+    height: 2rem;
     padding: 0 0.275rem;
     margin-top: 0.075em;
     border-radius: 4px;
@@ -153,6 +155,11 @@
     margin-top: 1px;
 }
 
+.discord-custom-emoji-image {
+    width: 17px !important;
+    height: 17px !important;
+}
+
 .discord-message-markup .hydrated code, .discord-message-markup code {
     border-radius: 4.3px;
     padding-top: 1.5px;
@@ -248,7 +255,18 @@
     padding-right: 5px;
 }
 
+.discord-time-mark:hover:before {
+    position: absolute;
+    top: -28px;
+    content: "Timestamp mark";
+    background: rgb(13 13 13 / 85%);
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
 /* Time marks */
 .discord-message [id$="-mark"] {
     line-height: 19px;
 }
+

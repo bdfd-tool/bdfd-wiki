@@ -18,8 +18,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |-
-          gh release download -R rust-lang/mdBook -p mdbook-*-x86_64-unknown-linux-gnu.tar.gz
-          gh release download -R tommilligan/mdbook-admonish -p mdbook-admonish-*-x86_64-unknown-linux-gnu.tar.gz
+          gh release download v0.4.52 -R rust-lang/mdBook -p mdbook-*-x86_64-unknown-linux-gnu.tar.gz
+          gh release download v1.20.0 -R tommilligan/mdbook-admonish -p mdbook-admonish-*-x86_64-unknown-linux-gnu.tar.gz
           gh release download -R NilPointer-Software/mdbook-discord-components -p mdbook-discord-components-*.tar.gz
 
           for file in *.tar.gz
@@ -54,6 +54,7 @@ jobs:
       - name: Prepare to fetch book
         run: |-
           mv nightly ..
+          mv CNAME ..
           rm -rf *
 
       - name: Fetch book artifact
@@ -64,6 +65,7 @@ jobs:
       - name: Deploy
         run: |-
           mv ../nightly .
+          mv ../CNAME .
           git add -A
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
@@ -131,13 +133,13 @@ jobs:
           webhook: ${{ secrets.WEBHOOK }}
           embed: |-
             title: "${{ env.TYPE }} Wiki Update"
-            color: 10001644
+            color: 6504371
             author:
               name: ${{ github.event.head_commit.author.username }}
               url: https://github.com/${{ github.event.head_commit.author.username }}
               icon_url: https://github.com/${{ github.event.head_commit.author.username }}.png
             thumbnail:
-              url: https://botdesignerdiscord.com/logo512.png
+              url: https://app.botdesignerdiscord.com/icons/Icon-512.png
             description: |-
               **__Content__**
 
@@ -150,4 +152,5 @@ jobs:
             - type: 2
               style: 5
               label: Preview site
-              url: https://nilpointer-software.github.io/bdfd-wiki/${{ env.LINK }}
+              url: https://wiki.botdesignerdiscord.com/nightly/${{ env.LINK }}
+
