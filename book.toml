@@ -1,7 +1,7 @@
 [book]
-title = "Bot Designer For Discord - Wiki"
-authors = ["NilPointer Software"]
-description = "The official documentation of BDFD. It covers guides, examples related to BDScript, BDJS and as well features too."
+title = "BDFD - Community Tools"
+authors = ["Community"]
+description = "Improves the quality of BDFD usage."
 
 [build]
 create-missing = false

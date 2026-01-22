@@ -134,7 +134,7 @@
 
         <a href="{{ path_to_root }}index.html" class="navbar-brand">
             <img class="navbar-brand-icon" src="{{ path_to_root }}assets/logo192.png" alt="BDFD Wiki Logo">
-            <span class="navbar-brand-text">BDFD Wiki</span>
+            <span class="navbar-brand-text">BDFD Tools</span>
         </a>
 
         <div class="menu-buttons">
@@ -158,7 +158,7 @@
         {{#if search_enabled}}
             <div id="search-wrapper" class="hidden">
                 <form id="searchbar-outer" class="searchbar-outer">
-                    <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search documentation..."
+                    <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search tools..."
                            aria-controls="searchresults-outer" aria-describedby="searchresults-header">
                     <div class="search-hint">Press <kbd>ESC</kbd> or click outside to close</div>
                 </form>
@@ -204,48 +204,8 @@
                 {{{ content }}}
             </main>
 
-            <nav class="nav-wrapper" aria-label="Page navigation">
-                <!-- Mobile navigation buttons -->
-                {{#previous}}
-                    <a rel="prev" href="{{ path_to_root }}{{link}}" class="mobile-nav-chapters previous"
-                       title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
-                {{/previous}}
-
-                {{#next}}
-                    <a rel="next" href="{{ path_to_root }}{{link}}" class="mobile-nav-chapters next"
-                       title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
-                {{/next}}
-
-                <div style="clear: both"></div>
-            </nav>
         </div>
     </div>
-
-    <nav class="nav-wide-wrapper" aria-label="Page navigation">
-        {{#previous}}
-        <a href="{{ path_to_root }}{{link}}" class="nav-chapters previous" title="Previous chapter"
-           aria-label="Previous chapter" aria-keyshortcuts="Left">
-            <a href="{{ path_to_root }}{{link}}" class="nav-chapters previous" title="Previous page"
-               aria-label="Previous page" aria-keyshortcuts="Left">
-                <i class="fa fa-angle-left"></i>
-            </a>
-        {{/previous}}
-
-        {{#next}}
-            <a href="{{ path_to_root }}{{link}}" class="nav-chapters next" title="Next chapter"
-               aria-label="Next chapter" aria-keyshortcuts="Right">
-                <a href="{{ path_to_root }}{{link}}" class="nav-chapters next" title="Next page"
-                   aria-label="Next page" aria-keyshortcuts="Right">
-                    <i class="fa fa-angle-right"></i>
-                </a>
-            </a>
-        {{/next}}
-    </a>
-    </nav>
 
 </div>
 

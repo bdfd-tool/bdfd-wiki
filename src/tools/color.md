@@ -158,25 +158,25 @@ You can use color hex in the "Color hex" parameters.
 ```
 
 **SET**:
-- [`$addContainer[]`](../bdscript/addContainer.md)
-- [`$color[]`](../bdscript/color.md)
-- [`$colorRole[]`](../bdscript/colorRole.md)
-- [`$createRole[]`](../bdscript/createRole.md)
-- [`$editEmbedIn[]`](../bdscript/editEmbedIn.md)
-- [`$editMessage[]`](../bdscript/editMessage.md)
-- [`$embedSuppressErrors[]`](../bdscript/embedSuppressErrors.md)
-- [`$modifyRole[]`](../bdscript/modifyRole.md)
-- [`$sendEmbedMessage[]`](../bdscript/sendEmbedMessage.md)
-- [`$webhookColor[]`](../bdscript/webhookColor.md)
-- [`$webhookSend[]`](../bdscript/webhookSend.md)
+- [`$addContainer[]`](https://wiki.botdesignerdiscord.com/nightly//bdscript/addContainer.md)
+- [`$color[]`](https://wiki.botdesignerdiscord.com/nightly//bdscript/color.md)
+- [`$colorRole[]`](https://wiki.botdesignerdiscord.com/nightly//bdscript/colorRole.md)
+- [`$createRole[]`](https://wiki.botdesignerdiscord.com/nightly//bdscript/createRole.md)
+- [`$editEmbedIn[]`](https://wiki.botdesignerdiscord.com/nightly//bdscript/editEmbedIn.md)
+- [`$editMessage[]`](https://wiki.botdesignerdiscord.com/nightly//bdscript/editMessage.md)
+- [`$embedSuppressErrors[]`](https://wiki.botdesignerdiscord.com/nightly//bdscript/embedSuppressErrors.md)
+- [`$modifyRole[]`](https://wiki.botdesignerdiscord.com/nightly//bdscript/modifyRole.md)
+- [`$sendEmbedMessage[]`](https://wiki.botdesignerdiscord.com/nightly//bdscript/sendEmbedMessage.md)
+- [`$webhookColor[]`](https://wiki.botdesignerdiscord.com/nightly//bdscript/webhookColor.md)
+- [`$webhookSend[]`](https://wiki.botdesignerdiscord.com/nightly//bdscript/webhookSend.md)
 
 **GET**:
-- [`$getRoleColor[]`](../bdscript/getRoleColor.md)
-- [`$roleInfo[]`](../bdscript/roleInfo.md)
-- [`$userBannerColor[]`](../bdscript/userBannerColor.md)
+- [`$getRoleColor[]`](https://wiki.botdesignerdiscord.com/nightly//bdscript/getRoleColor.md)
+- [`$roleInfo[]`](https://wiki.botdesignerdiscord.com/nightly//bdscript/roleInfo.md)
+- [`$userBannerColor[]`](https://rainb0wkey.github.io/bdfd-wiki/nightly/bdscript/userBannerColor.md)
 
 **CHECK**:
-- [`$isValidHex[]`](../bdscript/isValidHex.md)
+- [`$isValidHex[]`](https://wiki.botdesignerdiscord.com/nightly//bdscript/isValidHex.md)
 
 ## Example
 ```
@@ -204,5 +204,5 @@ $color[#673ab7]
 
 
 ```admonish question title="What is this?"
-How [`$color[]`](../bdscript/color.md) and [`$description[]`](../bdscript/description.md) works?
+How [`$color[]`](https://wiki.botdesignerdiscord.com/nightly//bdscript/color.md) and [`$description[]`](https://wiki.botdesignerdiscord.com/nightly//bdscript/description.md) works?
 ```
