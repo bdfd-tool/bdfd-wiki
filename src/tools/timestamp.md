@@ -130,7 +130,7 @@
 Here you can manage UnixTime for your commands.
 
 ```admonish note
-Unix time is a system for tracking time by counting the number of seconds that have passed since January 1st, 1970. This value is stored as a simple integer, which computers can easily process and calculate with. For example, the function [`$getTimestamp`](../bdscript/getTimestamp.md) can be used to get the current Unix timestamp or perform time-based operations for your bot.
+Unix time is a system for tracking time by counting the number of seconds that have passed since January 1st, 1970. This value is stored as a simple integer, which computers can easily process and calculate with. For example, the function [`$getTimestamp`](https://wiki.botdesignerdiscord.com/nightly//bdscript/getTimestamp.md) can be used to get the current Unix timestamp or perform time-based operations for your bot.
 ```
 
 ```admonish info
@@ -182,14 +182,14 @@ The timezone selected on your device is used as default.
 Here are all the functions related to unix timestamp.
 
 **GET**:
-- [`$getEmbedData[]`](../bdscript/getEmbedData.md)
-- [`$getTimestamp`](../bdscript/getTimestamp.md)
-- [`$getTimestamp[]`](../bdscript/getTimestampComplex.md)
-- [`$hostingExpireTime`](../bdscript/hostingExpireTime.md)
-- [`$hostingExpireTime[]`](../bdscript/hostingExpireTimeComplex.md)
-- [`$lastPinTimestamp`](../bdscript/lastPinTimestamp.md)
-- [`$messageEditedTimestamp[]`](../bdscript/messageEditedTimestamp.md)
-- [`$premiumExpireTime`](../bdscript/premiumExpireTime.md)
+- [`$getEmbedData[]`](https://wiki.botdesignerdiscord.com/nightly//bdscript/getEmbedData.md)
+- [`$getTimestamp`](https://wiki.botdesignerdiscord.com/nightly//bdscript/getTimestamp.md)
+- [`$getTimestamp[]`](https://wiki.botdesignerdiscord.com/nightly//bdscript/getTimestampComplex.md)
+- [`$hostingExpireTime`](https://wiki.botdesignerdiscord.com/nightly//bdscript/hostingExpireTime.md)
+- [`$hostingExpireTime[]`](https://wiki.botdesignerdiscord.com/nightly//bdscript/hostingExpireTimeComplex.md)
+- [`$lastPinTimestamp`](https://wiki.botdesignerdiscord.com/nightly//bdscript/lastPinTimestamp.md)
+- [`$messageEditedTimestamp[]`](https://wiki.botdesignerdiscord.com/nightly//bdscript/messageEditedTimestamp.md)
+- [`$premiumExpireTime`](https://wiki.botdesignerdiscord.com/nightly//bdscript/premiumExpireTime.md)
 
 ## Example
 ```
@@ -213,5 +213,5 @@ Unix date: <t:1917043200:D>
 ```
 
 ```admonish example
-You can use [Discord timestamp highlighting](../resources/discordTimestamps.md) to make your code look nicer!
+You can use [Discord timestamp highlighting](https://wiki.botdesignerdiscord.com/nightly//resources/discordTimestamps.md) to make your code look nicer!
 ```
