@@ -707,4 +707,4 @@
     </div>
 </div>
 
-<script src="json-validator-enhanced.js"></script>
+<script src="json-validator.js"></script>
