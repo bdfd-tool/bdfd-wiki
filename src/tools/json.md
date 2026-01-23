@@ -1,11 +1,4 @@
-
 <style>
-:root {
-    --color1: #7289da;
-    --color2: #43b581;
-    --color3: #2f3136;
-}
-
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     max-width: 900px;
@@ -16,9 +9,9 @@ body {
 }
 
 .container {
-    background-color: var(--color3);
+    background-color: var(--card-bg);
     padding: 25px;
-    border-radius: 10px;
+    border-radius: var(--border-radius);
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
 }
 
@@ -30,32 +23,36 @@ h1 {
 }
 
 .description {
-    background-color: #40444b;
+    background-color: var(--card-hover);
     padding: 20px;
-    border-radius: 8px;
+    border-radius: var(--border-radius);
     margin-bottom: 25px;
-    border-left: 4px solid var(--color1);
+    border-left: 4px solid var(--link-color);
 }
 
 .description p {
-    font-size: 16px;
+    font-size: 1.5rem;
     line-height: 1.6;
-    margin-bottom: 10px;
+    margin-bottom: 1rem;
     color: #dcddde;
 }
 
+.description p:last-child {
+    margin-bottom: 0;
+}
+
 .input-section {
-    margin-bottom: 25px;
+    margin: 2rem 0;
 }
 
 .json-input {
     width: 100%;
     min-height: 200px;
-    padding: 15px;
-    font-size: 16px;
-    background-color: #40444b;
-    border: 2px solid #202225;
-    border-radius: 8px;
+    padding: 1.5rem;
+    font-size: 1.5rem;
+    background-color: var(--card-bg);
+    border: 2px solid var(--card-hover);
+    border-radius: var(--border-radius);
     color: #ffffff;
     box-sizing: border-box;
     font-family: 'Consolas', monospace;
@@ -64,250 +61,388 @@ h1 {
 
 .json-input:focus {
     outline: none;
-    border-color: var(--color1);
+    border-color: var(--link-color);
 }
 
 .json-input.valid {
-    border-color: var(--color2);
+    border-color: var(--success);
 }
 
 .json-input.invalid {
-    border-color: #ed4245;
+    border-color: var(--error);
 }
 
 .control-buttons {
     display: flex;
-    gap: 15px;
-    margin-bottom: 25px;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    justify-content: center;
+    align-items: center;
 }
 
 .control-button {
-    flex: 1;
-    padding: 12px 20px;
-    background-color: var(--color1);
-    color: white;
+    outline: none;
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    height: 4rem;
     border: none;
-    border-radius: 6px;
-    font-size: 16px;
-    font-weight: 600;
+    border-radius: var(--border-radius);
     cursor: pointer;
-    transition: all 0.2s;
+    font-size: 2.25rem;
+    margin: 0.25%;
+    color: #fff;
+    background: hsl(0deg 0% 100% / 7%);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+    flex: 1;
     text-align: center;
+    transition: all 0.2s;
 }
 
 .control-button:hover {
-    background-color: #5b6eae;
-    transform: translateY(-2px);
+    transform: scale(1.05);
+    border-radius: 8px;
+    border-width: 1px;
+    transition: 0.2s;
 }
 
 .control-button.format {
-    background-color: var(--color2);
-}
-
-.control-button.format:hover {
-    background-color: #3ca374;
+    background: hsl(0deg 0% 100% / 7%);
 }
 
 .control-button.clear {
-    background-color: #ed4245;
-}
-
-.control-button.clear:hover {
-    background-color: #c03537;
+    background: hsl(0deg 0% 100% / 7%);
 }
 
 .results {
-    background-color: #202225;
-    padding: 20px;
-    border-radius: 8px;
-    margin-top: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background-color: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin-top: -1rem;
 }
 
 .results h3 {
     margin-top: 0;
     color: #ffffff;
-    font-size: 18px;
-    border-bottom: 2px solid var(--color1);
-    padding-bottom: 10px;
+    font-size: 2rem;
+    border-bottom: 2px solid var(--link-color);
+    padding-bottom: 0.75rem;
 }
 
 .result-content {
-    min-height: 80px;
-    padding: 15px 0;
+    min-height: 1rem;
+    padding: 0rem 0;
+}
+
+#jsonPreview {
+    margin-top: -2rem;
 }
 
 .stats-section {
-    background-color: #2f3136;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background-color: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin-top: 2rem;
 }
 
 .stats-section h3 {
     margin-top: 0;
     color: #ffffff;
-    font-size: 18px;
-    border-bottom: 2px solid var(--color1);
-    padding-bottom: 10px;
+    font-size: 2rem;
+    border-bottom: 2px solid var(--link-color);
+    padding-bottom: 0.75rem;
 }
 
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 15px;
-    margin-top: 15px;
+    margin-top: 1rem;
 }
 
 .stat-item {
-    background-color: #40444b;
-    padding: 15px;
-    border-radius: 6px;
-    border-left: 4px solid var(--color2);
+    background-color: rgb(10 10 10 / 15%);
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--success);
+    transition: all 0.2s;
+}
+
+.stat-item:hover {
+    transform: translateY(-2px);
 }
 
 .stat-label {
-    color: #99aab5;
-    font-size: 14px;
+    color: var(--text-muted);
+    font-size: 1.4rem;
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-bottom: 5px;
+    margin-bottom: 0.5rem;
 }
 
 .stat-value {
     color: #ffffff;
-    font-size: 20px;
+    font-size: 2rem;
     font-weight: bold;
     font-family: 'Consolas', monospace;
 }
 
 .errors-section {
-    background-color: #2f3136;
-    padding: 20px;
-    border-radius: 8px;
-    margin-top: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background-color: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin-top: 2rem;
 }
 
 .errors-section h3 {
     margin-top: 0;
     color: #ffffff;
-    font-size: 18px;
-    border-bottom: 2px solid #ed4245;
-    padding-bottom: 10px;
+    font-size: 2rem;
+    border-bottom: 2px solid var(--error);
+    padding-bottom: 0.75rem;
 }
 
 .error-list {
     list-style-type: none;
     padding-left: 0;
-    margin: 15px 0 0 0;
+    margin: 1rem 0 0 0;
 }
 
 .error-list li {
-    padding: 12px;
-    margin: 8px 0;
-    background-color: rgba(237, 66, 69, 0.1);
-    border-radius: 6px;
-    border-left: 4px solid #ed4245;
-    color: #f04747;
-    font-size: 14px;
+    padding: 1rem;
+    margin: 1rem 0;
+    background-color: rgb(10 10 10 / 15%);
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--error);
+    color: var(--error);
+    font-size: 1.5rem;
     display: flex;
     align-items: flex-start;
 }
 
 .error-icon {
-    margin-right: 10px;
-    font-size: 16px;
+    margin-right: 1rem;
+    font-size: 1.6rem;
 }
 
 .keys-section {
-    background-color: #2f3136;
-    padding: 20px;
-    border-radius: 8px;
-    margin-top: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background-color: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin-top: 2rem;
 }
 
 .keys-section h3 {
     margin-top: 0;
     color: #ffffff;
-    font-size: 18px;
-    border-bottom: 2px solid var(--color2);
-    padding-bottom: 10px;
+    font-size: 2rem;
+    border-bottom: 2px solid var(--success);
+    padding-bottom: 0.75rem;
+}
+
+.keys-container {
+    margin-top: 1rem;
+}
+
+.key-group {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background-color: rgb(10 10 10 / 15%);
+    border-radius: var(--border-radius);
+    transition: all 0.2s;
+}
+
+.key-group:hover {
+    transform: translateY(-2px);
+}
+
+.key-group-title {
+    color: var(--link-color);
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.key-count {
+    background-color: var(--success);
+    color: white;
+    padding: 0.2rem 0.8rem;
+    border-radius: 10px;
+    font-size: 1.2rem;
 }
 
 .keys-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 15px;
+    gap: 1rem;
 }
 
 .key-item {
-    background-color: #40444b;
-    padding: 8px 15px;
-    border-radius: 20px;
+    background-color: var(--card-hover);
+    padding: 1rem;
+    border-radius: var(--border-radius);
     border: 2px solid transparent;
     cursor: pointer;
     transition: all 0.2s;
-    font-size: 14px;
+    font-size: 1.4rem;
     color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 200px;
 }
 
 .key-item:hover {
-    background-color: var(--color1);
+    background-color: rgb(102 126 234 / 20%);
     transform: translateY(-2px);
 }
 
 .key-item.editing {
-    background-color: var(--color2);
-    border-color: var(--color2);
+    background-color: var(--success);
+    border-color: var(--success);
 }
 
-.key-input {
+.key-name {
+    font-weight: bold;
+    color: var(--link-color);
+}
+
+.key-value {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    font-family: 'Consolas', monospace;
+    word-break: break-all;
+    max-width: 250px;
+}
+
+.key-value.string {
+    color: var(--success);
+}
+
+.key-value.number {
+    color: #faa61a;
+}
+
+.key-value.boolean {
+    color: var(--error);
+}
+
+.key-value.null {
+    color: var(--text-muted);
+}
+
+.key-value.object {
+    color: var(--link-color);
+    font-style: italic;
+}
+
+.key-value.array {
+    color: var(--link-color);
+    font-style: italic;
+}
+
+.key-input, .value-input {
     background: transparent;
     border: none;
     color: #ffffff;
-    font-size: 14px;
+    font-size: 1.4rem;
     outline: none;
-    width: 150px;
-    padding: 2px 5px;
-    border-bottom: 1px solid var(--color2);
+    padding: 0.2rem 0.5rem;
+    border-bottom: 1px solid var(--success);
+    width: 100%;
+}
+
+.value-input {
+    border-bottom-color: var(--link-color);
+    font-family: 'Consolas', monospace;
+}
+
+.edit-controls {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.edit-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.2s;
+    background: hsl(0deg 0% 100% / 7%);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+    color: #fff;
+}
+
+.edit-btn:hover {
+    transform: scale(1.05);
+    border-radius: 8px;
+    border-width: 1px;
+    transition: 0.2s;
 }
 
 .success {
-    color: var(--color2);
-    padding: 15px;
-    background-color: rgba(67, 181, 129, 0.1);
-    border-radius: 6px;
+    color: var(--success);
+    padding: 1.5rem;
+    background-color: rgb(10 10 10 / 15%);
+    border-radius: var(--border-radius);
     text-align: center;
-    border-left: 4px solid var(--color2);
+    border-left: 4px solid var(--success);
 }
 
 .no-results {
-    color: #99aab5;
+    color: var(--text-muted);
     font-style: italic;
     text-align: center;
-    padding: 20px;
+    padding: 1rem;
+    font-size: 1.5rem;
+}
+
+.search-info {
+    color: var(--text-secondary);
+    font-size: 1.6rem;
+    margin-top: -1.5rem;
+    padding-top: 0;
+}
+
+.warning {
+    color: var(--error);
+    font-size: 1.4rem;
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: var(--border-radius);
 }
 
 .json-preview {
-    background-color: #2f3136;
-    padding: 15px;
-    border-radius: 6px;
-    margin-top: 15px;
+    background-color: rgb(10 10 10 / 15%);
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    margin-top: 1rem;
     max-height: 300px;
     overflow-y: auto;
     font-family: 'Consolas', monospace;
-    font-size: 14px;
+    font-size: 1.4rem;
     white-space: pre-wrap;
     word-break: break-all;
 }
 
 .json-key {
-    color: var(--color1);
+    color: var(--link-color);
     font-weight: bold;
 }
 
 .json-string {
-    color: var(--color2);
+    color: var(--success);
 }
 
 .json-number {
@@ -315,11 +450,11 @@ h1 {
 }
 
 .json-boolean {
-    color: #ed4245;
+    color: var(--error);
 }
 
 .json-null {
-    color: #99aab5;
+    color: var(--text-muted);
 }
 
 .json-bracket {
@@ -336,7 +471,7 @@ h1 {
         <p>Click on any key to edit it directly in the JSON structure.</p>
     </div>
     <div class="input-section">
-        <textarea class="json-input" id="jsonInput" placeholder='Paste your JSON here... Example: {"name": "John", "age": 30, "city": "New York"}'>{"name": "John", "age": 30, "city": "New York"}</textarea>
+        <textarea class="json-input" id="jsonInput" placeholder='Paste your JSON here... Example: {"name": "John", "age": 30, "city": "New York"}'>{"name": "John", "age": 30, "city": "New York", "name": "Duplicate"}</textarea>
     </div>
     <div class="control-buttons">
         <button class="control-button" id="validateBtn">Validate JSON</button>
@@ -349,7 +484,7 @@ h1 {
     </div>
     <div class="keys-section" id="keysSection" style="display: none;">
         <h3>JSON Keys</h3>
-        <div class="keys-list" id="keysList"></div>
+        <div class="keys-container" id="keysContainer"></div>
     </div>
     <div class="errors-section" id="errorsSection" style="display: none;">
         <h3>Validation Errors</h3>
@@ -363,4 +498,4 @@ h1 {
     </div>
 </div>
 
-<script src="json-validator.js"></script>
+<script src="json-validator.js"></script><script src="json-validator.js"></script>
