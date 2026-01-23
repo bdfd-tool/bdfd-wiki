@@ -1,23 +1,42 @@
-// Enhanced JSON Validator Application with duplicate key support
+// Enhanced JSON Validator Application with search and key management
 
 // DOM Elements
 const jsonInput = document.getElementById('jsonInput');
 const validateBtn = document.getElementById('validateBtn');
 const formatBtn = document.getElementById('formatBtn');
 const clearBtn = document.getElementById('clearBtn');
+const searchSection = document.getElementById('searchSection');
+const searchInput = document.getElementById('searchInput');
+const clearSearchBtn = document.getElementById('clearSearchBtn');
+const searchStats = document.getElementById('searchStats');
+const advancedControls = document.getElementById('advancedControls');
+const addKeyBtn = document.getElementById('addKeyBtn');
+const duplicateKeyBtn = document.getElementById('duplicateKeyBtn');
+const deleteKeyBtn = document.getElementById('deleteKeyBtn');
+const addKeyDialog = document.getElementById('addKeyDialog');
+const newKeyName = document.getElementById('newKeyName');
+const newKeyValue = document.getElementById('newKeyValue');
+const newKeyPath = document.getElementById('newKeyPath');
+const saveNewKeyBtn = document.getElementById('saveNewKeyBtn');
+const cancelNewKeyBtn = document.getElementById('cancelNewKeyBtn');
 const statsSection = document.getElementById('statsSection');
 const statsGrid = document.getElementById('statsGrid');
 const keysSection = document.getElementById('keysSection');
+const keysCount = document.getElementById('keysCount');
 const keysContainer = document.getElementById('keysContainer');
 const errorsSection = document.getElementById('errorsSection');
 const errorList = document.getElementById('errorList');
 const previewSection = document.getElementById('previewSection');
 const jsonPreview = document.getElementById('jsonPreview');
 
-// Current editing state
+// Current state
 let currentJson = null;
 let editingItem = null;
 let keyIndexMap = new Map();
+let selectedKeys = new Set();
+let searchQuery = '';
+let searchType = 'name';
+let allKeysData = [];
 
 // Initialize the application
 function initializeApp() {
@@ -25,6 +44,25 @@ function initializeApp() {
     validateBtn.addEventListener('click', validateJson);
     formatBtn.addEventListener('click', formatJson);
     clearBtn.addEventListener('click', clearJson);
+    
+    // Search functionality
+    searchInput.addEventListener('input', handleSearch);
+    clearSearchBtn.addEventListener('click', clearSearch);
+    document.querySelectorAll('input[name="searchType"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            searchType = e.target.value;
+            handleSearch();
+        });
+    });
+    
+    // Advanced controls
+    addKeyBtn.addEventListener('click', showAddKeyDialog);
+    duplicateKeyBtn.addEventListener('click', duplicateSelectedKeys);
+    deleteKeyBtn.addEventListener('click', deleteSelectedKeys);
+    
+    // Add key dialog
+    saveNewKeyBtn.addEventListener('click', saveNewKey);
+    cancelNewKeyBtn.addEventListener('click', hideAddKeyDialog);
     
     // Auto-validate on input with debounce
     let debounceTimer;
@@ -44,6 +82,8 @@ function validateJson() {
     // Clear previous results
     clearResults();
     keyIndexMap.clear();
+    selectedKeys.clear();
+    allKeysData = [];
     
     if (!input) {
         showNoInputMessage();
@@ -58,11 +98,16 @@ function validateJson() {
         jsonInput.classList.remove('invalid');
         jsonInput.classList.add('valid');
         
+        // Show controls
+        searchSection.style.display = 'block';
+        advancedControls.style.display = 'flex';
+        
         // Show statistics
         showStatistics(currentJson);
         
         // Show keys
-        showKeys(currentJson);
+        collectAllKeys(currentJson);
+        showKeys(allKeysData);
         
         // Show preview
         showPreview(currentJson);
@@ -71,6 +116,8 @@ function validateJson() {
         // Handle JSON parsing errors
         jsonInput.classList.remove('valid');
         jsonInput.classList.add('invalid');
+        searchSection.style.display = 'none';
+        advancedControls.style.display = 'none';
         
         showError(error);
     }
@@ -103,6 +150,9 @@ function clearJson() {
     jsonInput.value = '';
     clearResults();
     jsonInput.classList.remove('valid', 'invalid');
+    searchSection.style.display = 'none';
+    advancedControls.style.display = 'none';
+    hideAddKeyDialog();
     showNoInputMessage();
 }
 
@@ -116,6 +166,8 @@ function clearResults() {
     keysContainer.innerHTML = '';
     errorList.innerHTML = '';
     jsonPreview.innerHTML = '';
+    selectedKeys.clear();
+    updateSelectedCount();
 }
 
 // Show message when no input
@@ -138,6 +190,36 @@ function showError(error) {
     `;
     
     errorList.appendChild(errorItem);
+}
+
+// Collect all keys from JSON
+function collectAllKeys(json) {
+    allKeysData = [];
+    
+    function collect(obj, path = '') {
+        if (typeof obj === 'object' && obj !== null) {
+            Object.keys(obj).forEach(key => {
+                const fullPath = path ? `${path}.${key}` : key;
+                const value = obj[key];
+                const valueType = getValueType(value);
+                
+                allKeysData.push({
+                    key: key,
+                    path: fullPath,
+                    value: value,
+                    valueType: valueType,
+                    displayValue: formatValueForDisplay(value),
+                    parentPath: path
+                });
+                
+                if (typeof value === 'object' && value !== null) {
+                    collect(value, fullPath);
+                }
+            });
+        }
+    }
+    
+    collect(json);
 }
 
 // Calculate and display JSON statistics
@@ -189,43 +271,30 @@ function calculateStatistics(obj, depth = 0) {
         totalSize: JSON.stringify(obj).length
     };
     
-    function traverse(current, currentDepth, path = '') {
+    function traverse(current, currentDepth) {
         stats.maxDepth = Math.max(stats.maxDepth, currentDepth);
         
         if (Array.isArray(current)) {
             stats.arrayCount++;
-            current.forEach((item, index) => {
+            current.forEach(item => {
                 if (typeof item === 'object' && item !== null) {
-                    traverse(item, currentDepth + 1, `${path}[${index}]`);
+                    traverse(item, currentDepth + 1);
                 }
             });
         } else if (typeof current === 'object' && current !== null) {
             stats.objectCount++;
             
-            // Track keys for duplicates
-            const keys = Object.keys(current);
-            keys.forEach(key => {
-                const fullPath = path ? `${path}.${key}` : key;
-                
-                // Count total keys
+            Object.keys(current).forEach(key => {
                 stats.totalKeys++;
                 
-                // Track duplicates
                 if (stats.uniqueKeys.has(key)) {
                     stats.duplicateKeys++;
                 } else {
                     stats.uniqueKeys.add(key);
                 }
                 
-                // Store in key index map for duplicate handling
-                if (!keyIndexMap.has(key)) {
-                    keyIndexMap.set(key, []);
-                }
-                keyIndexMap.get(key).push(fullPath);
-                
                 const value = current[key];
                 
-                // Count value types
                 if (typeof value === 'string') {
                     stats.stringCount++;
                 } else if (typeof value === 'number') {
@@ -235,63 +304,75 @@ function calculateStatistics(obj, depth = 0) {
                 } else if (value === null) {
                     stats.nullCount++;
                 } else if (typeof value === 'object') {
-                    traverse(value, currentDepth + 1, fullPath);
+                    traverse(value, currentDepth + 1);
                 }
             });
         }
     }
     
     traverse(obj, depth);
-    
-    // Convert Set size to number
     stats.uniqueKeys = stats.uniqueKeys.size;
     
     return stats;
 }
 
-// Get the root type of JSON
-function getRootType(obj) {
-    if (Array.isArray(obj)) return 'Array';
-    if (typeof obj === 'object' && obj !== null) return 'Object';
-    return typeof obj;
+// Handle search input
+function handleSearch() {
+    searchQuery = searchInput.value.trim().toLowerCase();
+    
+    if (!searchQuery) {
+        showKeys(allKeysData);
+        searchStats.textContent = '';
+        return;
+    }
+    
+    const filteredKeys = allKeysData.filter(item => {
+        if (searchType === 'name') {
+            return item.key.toLowerCase().includes(searchQuery);
+        } else if (searchType === 'value') {
+            return JSON.stringify(item.value).toLowerCase().includes(searchQuery);
+        } else if (searchType === 'both') {
+            return item.key.toLowerCase().includes(searchQuery) || 
+                   JSON.stringify(item.value).toLowerCase().includes(searchQuery);
+        }
+        return false;
+    });
+    
+    showKeys(filteredKeys, true);
+    
+    // Update search stats
+    searchStats.textContent = `Found ${filteredKeys.length} matching key${filteredKeys.length !== 1 ? 's' : ''}`;
 }
 
-// Display all keys from JSON with duplicate support
-function showKeys(json) {
+// Clear search
+function clearSearch() {
+    searchInput.value = '';
+    searchQuery = '';
+    showKeys(allKeysData);
+    searchStats.textContent = '';
+}
+
+// Show keys with search highlighting
+function showKeys(keysData, highlightMatches = false) {
     keysSection.style.display = 'block';
     keysContainer.innerHTML = '';
     
-    // Group keys by name to handle duplicates
-    const keyGroups = new Map();
-    
-    // Collect all key-value pairs with their paths
-    function collectKeys(obj, path = '', parent = json) {
-        if (typeof obj === 'object' && obj !== null) {
-            Object.keys(obj).forEach(key => {
-                const fullPath = path ? `${path}.${key}` : key;
-                const value = obj[key];
-                const valueType = getValueType(value);
-                
-                if (!keyGroups.has(key)) {
-                    keyGroups.set(key, []);
-                }
-                
-                keyGroups.get(key).push({
-                    key: key,
-                    path: fullPath,
-                    value: value,
-                    valueType: valueType,
-                    displayValue: formatValueForDisplay(value)
-                });
-                
-                if (typeof value === 'object' && value !== null) {
-                    collectKeys(value, fullPath, obj);
-                }
-            });
-        }
+    if (keysData.length === 0) {
+        keysCount.textContent = '0';
+        keysContainer.innerHTML = '<div class="no-results">No keys found</div>';
+        return;
     }
     
-    collectKeys(json);
+    keysCount.textContent = keysData.length;
+    
+    // Group keys by name
+    const keyGroups = new Map();
+    keysData.forEach(item => {
+        if (!keyGroups.has(item.key)) {
+            keyGroups.set(item.key, []);
+        }
+        keyGroups.get(item.key).push(item);
+    });
     
     // Create UI for each key group
     keyGroups.forEach((items, keyName) => {
@@ -301,15 +382,29 @@ function showKeys(json) {
         const titleElement = document.createElement('div');
         titleElement.className = 'key-group-title';
         titleElement.innerHTML = `
-            ${keyName}
-            ${items.length > 1 ? `<span class="key-count">${items.length}</span>` : ''}
+            <span>${highlightText(keyName, searchQuery)}</span>
+            <div class="key-group-info">
+                <span class="key-count">${items.length}</span>
+                <div class="key-group-controls">
+                    <button class="group-button delete-all" title="Delete all ${keyName} keys">
+                        🗑️
+                    </button>
+                </div>
+            </div>
         `;
+        
+        // Add delete all functionality
+        titleElement.querySelector('.delete-all').addEventListener('click', () => {
+            if (confirm(`Delete all "${keyName}" keys?`)) {
+                deleteKeysByName(keyName);
+            }
+        });
         
         const keysListElement = document.createElement('div');
         keysListElement.className = 'keys-list';
         
         items.forEach((item, index) => {
-            const keyElement = createKeyElement(item, index);
+            const keyElement = createKeyElement(item, index, highlightMatches);
             keysListElement.appendChild(keyElement);
         });
         
@@ -319,48 +414,124 @@ function showKeys(json) {
     });
 }
 
-// Create a key element with edit functionality
-function createKeyElement(item, index) {
+// Create a key element
+function createKeyElement(item, index, highlightMatches = false) {
     const keyElement = document.createElement('div');
     keyElement.className = 'key-item';
     keyElement.dataset.path = item.path;
     keyElement.dataset.keyIndex = index;
     
+    if (selectedKeys.has(item.path)) {
+        keyElement.classList.add('selected');
+    }
+    
+    if (highlightMatches && searchQuery && 
+        (item.key.toLowerCase().includes(searchQuery) || 
+         JSON.stringify(item.value).toLowerCase().includes(searchQuery))) {
+        keyElement.classList.add('highlighted');
+    }
+    
     const keyNameElement = document.createElement('div');
     keyNameElement.className = 'key-name';
-    keyNameElement.textContent = item.key;
+    keyNameElement.textContent = highlightText(item.key, searchQuery);
+    
+    const keyPathElement = document.createElement('div');
+    keyPathElement.className = 'key-path';
+    keyPathElement.textContent = item.path;
     
     const keyValueElement = document.createElement('div');
     keyValueElement.className = `key-value ${item.valueType}`;
-    keyValueElement.textContent = item.displayValue;
+    keyValueElement.textContent = highlightText(item.displayValue, searchQuery);
     
-    const controlsElement = document.createElement('div');
-    controlsElement.className = 'edit-controls';
+    const actionsElement = document.createElement('div');
+    actionsElement.className = 'key-actions';
     
-    const editNameBtn = document.createElement('button');
-    editNameBtn.className = 'edit-btn';
-    editNameBtn.textContent = 'Edit Name';
-    editNameBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        startEditingKey(item, keyElement, 'name');
-    });
+    const editNameBtn = createActionButton('edit-name', '✏️', 'Edit Name', () => 
+        startEditingKey(item, keyElement, 'name'));
     
-    const editValueBtn = document.createElement('button');
-    editValueBtn.className = 'edit-btn';
-    editValueBtn.textContent = 'Edit Value';
-    editValueBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        startEditingKey(item, keyElement, 'value');
-    });
+    const editValueBtn = createActionButton('edit-value', '📝', 'Edit Value', () => 
+        startEditingKey(item, keyElement, 'value'));
     
-    controlsElement.appendChild(editNameBtn);
-    controlsElement.appendChild(editValueBtn);
+    const duplicateBtn = createActionButton('duplicate', '📋', 'Duplicate', () => 
+        duplicateKey(item));
+    
+    const deleteBtn = createActionButton('delete', '🗑️', 'Delete', () => 
+        deleteKey(item));
+    
+    const selectBtn = createActionButton('select', selectedKeys.has(item.path) ? '✅' : '☐', 
+        selectedKeys.has(item.path) ? 'Deselect' : 'Select', () => 
+        toggleKeySelection(item.path, keyElement, selectBtn));
+    
+    actionsElement.appendChild(editNameBtn);
+    actionsElement.appendChild(editValueBtn);
+    actionsElement.appendChild(duplicateBtn);
+    actionsElement.appendChild(deleteBtn);
+    actionsElement.appendChild(selectBtn);
     
     keyElement.appendChild(keyNameElement);
+    keyElement.appendChild(keyPathElement);
     keyElement.appendChild(keyValueElement);
-    keyElement.appendChild(controlsElement);
+    keyElement.appendChild(actionsElement);
     
     return keyElement;
+}
+
+// Create action button
+function createActionButton(type, icon, title, onClick) {
+    const button = document.createElement('button');
+    button.className = `key-button ${type}`;
+    button.innerHTML = icon;
+    button.title = title;
+    button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        onClick();
+    });
+    return button;
+}
+
+// Toggle key selection
+function toggleKeySelection(path, element, button) {
+    if (selectedKeys.has(path)) {
+        selectedKeys.delete(path);
+        element.classList.remove('selected');
+        button.innerHTML = '☐';
+        button.title = 'Select';
+    } else {
+        selectedKeys.add(path);
+        element.classList.add('selected');
+        button.innerHTML = '✅';
+        button.title = 'Deselect';
+    }
+    updateSelectedCount();
+}
+
+// Update selected keys count
+function updateSelectedCount() {
+    const count = selectedKeys.size;
+    if (count > 0) {
+        duplicateKeyBtn.textContent = `Duplicate (${count})`;
+        deleteKeyBtn.textContent = `Delete (${count})`;
+    } else {
+        duplicateKeyBtn.textContent = 'Duplicate Selected';
+        deleteKeyBtn.textContent = 'Delete Selected';
+    }
+}
+
+// Highlight search text
+function highlightText(text, query) {
+    if (!query || !text) return text;
+    
+    const lowerText = String(text).toLowerCase();
+    const lowerQuery = query.toLowerCase();
+    const index = lowerText.indexOf(lowerQuery);
+    
+    if (index === -1) return text;
+    
+    const before = text.substring(0, index);
+    const match = text.substring(index, index + query.length);
+    const after = text.substring(index + query.length);
+    
+    return `${before}<span style="background-color: #faa61a; color: #000; padding: 2px 0; border-radius: 3px;">${match}</span>${after}`;
 }
 
 // Get value type for CSS class
@@ -388,6 +559,172 @@ function formatValueForDisplay(value) {
     return String(value);
 }
 
+// Show add key dialog
+function showAddKeyDialog() {
+    addKeyDialog.style.display = 'block';
+    newKeyName.value = '';
+    newKeyValue.value = '';
+    newKeyPath.value = '';
+    newKeyName.focus();
+}
+
+// Hide add key dialog
+function hideAddKeyDialog() {
+    addKeyDialog.style.display = 'none';
+}
+
+// Save new key
+function saveNewKey() {
+    const keyName = newKeyName.value.trim();
+    const keyValue = parseValue(newKeyValue.value.trim());
+    const keyPath = newKeyPath.value.trim();
+    
+    if (!keyName) {
+        alert('Please enter a key name');
+        return;
+    }
+    
+    try {
+        let updatedJson = JSON.parse(jsonInput.value);
+        
+        if (keyPath) {
+            // Add to nested path
+            const pathParts = keyPath.split('.');
+            let current = updatedJson;
+            
+            for (let i = 0; i < pathParts.length; i++) {
+                if (!current[pathParts[i]] || typeof current[pathParts[i]] !== 'object') {
+                    current[pathParts[i]] = {};
+                }
+                if (i < pathParts.length - 1) {
+                    current = current[pathParts[i]];
+                } else {
+                    current[pathParts[i]][keyName] = keyValue;
+                }
+            }
+        } else {
+            // Add to root
+            updatedJson[keyName] = keyValue;
+        }
+        
+        jsonInput.value = JSON.stringify(updatedJson, null, 2);
+        validateJson();
+        hideAddKeyDialog();
+        
+    } catch (error) {
+        alert(`Error: ${error.message}`);
+    }
+}
+
+// Duplicate selected keys
+function duplicateSelectedKeys() {
+    if (selectedKeys.size === 0) {
+        alert('Please select keys to duplicate');
+        return;
+    }
+    
+    const suffix = '_copy';
+    try {
+        let updatedJson = JSON.parse(jsonInput.value);
+        
+        selectedKeys.forEach(path => {
+            const item = allKeysData.find(k => k.path === path);
+            if (item) {
+                const newKeyName = item.key + suffix;
+                updateKeyInJson(updatedJson, item.path, newKeyName);
+            }
+        });
+        
+        jsonInput.value = JSON.stringify(updatedJson, null, 2);
+        validateJson();
+        selectedKeys.clear();
+        updateSelectedCount();
+        
+    } catch (error) {
+        alert(`Error: ${error.message}`);
+    }
+}
+
+// Delete selected keys
+function deleteSelectedKeys() {
+    if (selectedKeys.size === 0) {
+        alert('Please select keys to delete');
+        return;
+    }
+    
+    if (!confirm(`Delete ${selectedKeys.size} selected key${selectedKeys.size !== 1 ? 's' : ''}?`)) {
+        return;
+    }
+    
+    try {
+        let updatedJson = JSON.parse(jsonInput.value);
+        
+        selectedKeys.forEach(path => {
+            updatedJson = deleteKeyByPath(updatedJson, path);
+        });
+        
+        jsonInput.value = JSON.stringify(updatedJson, null, 2);
+        validateJson();
+        selectedKeys.clear();
+        updateSelectedCount();
+        
+    } catch (error) {
+        alert(`Error: ${error.message}`);
+    }
+}
+
+// Delete keys by name
+function deleteKeysByName(keyName) {
+    try {
+        let updatedJson = JSON.parse(jsonInput.value);
+        const itemsToDelete = allKeysData.filter(item => item.key === keyName);
+        
+        itemsToDelete.forEach(item => {
+            updatedJson = deleteKeyByPath(updatedJson, item.path);
+        });
+        
+        jsonInput.value = JSON.stringify(updatedJson, null, 2);
+        validateJson();
+        
+    } catch (error) {
+        alert(`Error: ${error.message}`);
+    }
+}
+
+// Delete a single key
+function deleteKey(item) {
+    if (!confirm(`Delete key "${item.key}" at path "${item.path}"?`)) {
+        return;
+    }
+    
+    try {
+        let updatedJson = JSON.parse(jsonInput.value);
+        updatedJson = deleteKeyByPath(updatedJson, item.path);
+        
+        jsonInput.value = JSON.stringify(updatedJson, null, 2);
+        validateJson();
+        
+    } catch (error) {
+        alert(`Error: ${error.message}`);
+    }
+}
+
+// Duplicate a single key
+function duplicateKey(item) {
+    const suffix = '_copy';
+    try {
+        let updatedJson = JSON.parse(jsonInput.value);
+        const newKeyName = item.key + suffix;
+        updateKeyInJson(updatedJson, item.path, newKeyName);
+        
+        jsonInput.value = JSON.stringify(updatedJson, null, 2);
+        validateJson();
+        
+    } catch (error) {
+        alert(`Error: ${error.message}`);
+    }
+}
+
 // Start editing a key or value
 function startEditingKey(item, element, editType) {
     if (editingItem) {
@@ -401,7 +738,6 @@ function startEditingKey(item, element, editType) {
     element.innerHTML = '';
     
     if (editType === 'name') {
-        // Create name input
         const nameInput = document.createElement('input');
         nameInput.type = 'text';
         nameInput.className = 'key-input';
@@ -412,18 +748,13 @@ function startEditingKey(item, element, editType) {
         nameInput.focus();
         nameInput.select();
         
-        // Handle input events
         nameInput.addEventListener('blur', () => finishEditingKey(nameInput.value, null));
         nameInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                finishEditingKey(nameInput.value, null);
-            } else if (e.key === 'Escape') {
-                cancelEditing(element, item, editType);
-            }
+            if (e.key === 'Enter') finishEditingKey(nameInput.value, null);
+            if (e.key === 'Escape') cancelEditing(element, item, editType);
         });
         
     } else if (editType === 'value') {
-        // Create value input
         const valueInput = document.createElement('input');
         valueInput.type = 'text';
         valueInput.className = 'value-input';
@@ -434,14 +765,10 @@ function startEditingKey(item, element, editType) {
         valueInput.focus();
         valueInput.select();
         
-        // Handle input events
         valueInput.addEventListener('blur', () => finishEditingKey(null, valueInput.value));
         valueInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                finishEditingKey(null, valueInput.value);
-            } else if (e.key === 'Escape') {
-                cancelEditing(element, item, editType);
-            }
+            if (e.key === 'Enter') finishEditingKey(null, valueInput.value);
+            if (e.key === 'Escape') cancelEditing(element, item, editType);
         });
     }
 }
@@ -456,14 +783,11 @@ function finishEditingKey(newKey, newValue) {
         let updatedJson = JSON.parse(jsonInput.value);
         
         if (editType === 'name' && newKey && newKey !== item.key) {
-            // Update key name in JSON
             updatedJson = updateKeyInJson(updatedJson, item.path, newKey);
         } else if (editType === 'value' && newValue !== undefined) {
-            // Update value in JSON
             updatedJson = updateValueInJson(updatedJson, item.path, parseValue(newValue));
         }
         
-        // Update the input and re-validate
         jsonInput.value = JSON.stringify(updatedJson, null, 2);
         validateJson();
         
@@ -479,8 +803,7 @@ function finishEditingKey(newKey, newValue) {
 function cancelEditing(element, item, editType) {
     element.classList.remove('editing');
     
-    // Re-create the key element
-    const newElement = createKeyElement(item, element.dataset.keyIndex);
+    const newElement = createKeyElement(item, element.dataset.keyIndex, searchQuery !== '');
     element.parentNode.replaceChild(newElement, element);
     
     editingItem = null;
@@ -491,7 +814,6 @@ function updateKeyInJson(json, path, newKey) {
     const pathParts = path.split('.');
     let current = json;
     
-    // Navigate to parent object
     for (let i = 0; i < pathParts.length - 1; i++) {
         if (current[pathParts[i]] === undefined) {
             throw new Error(`Path not found: ${pathParts[i]}`);
@@ -502,7 +824,6 @@ function updateKeyInJson(json, path, newKey) {
     const oldKey = pathParts[pathParts.length - 1];
     
     if (current[oldKey] !== undefined) {
-        // Create new key and delete old one
         current[newKey] = current[oldKey];
         delete current[oldKey];
     }
@@ -515,7 +836,6 @@ function updateValueInJson(json, path, newValue) {
     const pathParts = path.split('.');
     let current = json;
     
-    // Navigate to the object containing the key
     for (let i = 0; i < pathParts.length - 1; i++) {
         if (current[pathParts[i]] === undefined) {
             throw new Error(`Path not found: ${pathParts[i]}`);
@@ -532,36 +852,54 @@ function updateValueInJson(json, path, newValue) {
     return json;
 }
 
+// Delete key by path
+function deleteKeyByPath(json, path) {
+    const pathParts = path.split('.');
+    let current = json;
+    
+    for (let i = 0; i < pathParts.length - 1; i++) {
+        if (current[pathParts[i]] === undefined) {
+            throw new Error(`Path not found: ${pathParts[i]}`);
+        }
+        current = current[pathParts[i]];
+    }
+    
+    const key = pathParts[pathParts.length - 1];
+    
+    if (current[key] !== undefined) {
+        delete current[key];
+    }
+    
+    return json;
+}
+
 // Parse input value to appropriate type
 function parseValue(input) {
     const trimmed = input.trim();
     
-    // Try to parse as JSON
     if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
         try {
             return JSON.parse(trimmed);
-        } catch (e) {
-            // If not valid JSON, treat as string
-        }
+        } catch (e) {}
     }
     
-    // Try to parse as number
     if (!isNaN(trimmed) && trimmed !== '') {
         const num = Number(trimmed);
-        if (!isNaN(num)) {
-            return num;
-        }
+        if (!isNaN(num)) return num;
     }
     
-    // Try to parse as boolean
     if (trimmed.toLowerCase() === 'true') return true;
     if (trimmed.toLowerCase() === 'false') return false;
-    
-    // Try to parse as null
     if (trimmed.toLowerCase() === 'null') return null;
     
-    // Default to string
     return trimmed;
+}
+
+// Get the root type of JSON
+function getRootType(obj) {
+    if (Array.isArray(obj)) return 'Array';
+    if (typeof obj === 'object' && obj !== null) return 'Object';
+    return typeof obj;
 }
 
 // Display formatted JSON preview
