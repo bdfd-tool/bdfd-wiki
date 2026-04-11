@@ -398,12 +398,12 @@ $description[⬅️ Border color hex]
 $color[#673ab7]
 </code></pre>
 <discord-messages>
-    <discord-message role-color="#E67E22" author="RainbowKey">
+    <discord-message author="RainbowKey" role-color="#E67E22">
         !example
     </discord-message>
-    <discord-message verified bot author="BDFD Support" role-color="#378afa">
+    <discord-message bot role-color="#378afa" verified author="BDFD Support">
         <none>
-        <discord-embed slot="embeds" color="#673ab7">
+        <discord-embed color="#673ab7" slot="embeds">
             <discord-embed-description slot="description">
                 ⬅️ Border color hex
             </discord-embed-description>
@@ -2548,7 +2548,7 @@ Unix date: &lt;t:1917043200:D&gt;
     <discord-message author="RainbowKey" role-color="#E67E22">
         !example
     </discord-message>
-    <discord-message author="BDFD Support" bot verified role-color="#378afa">
+    <discord-message author="BDFD Support" verified bot role-color="#378afa">
         Unix date: <div class="discord-time-mark">January 10, 2030</div>
     </discord-message>
 </discord-messages>
@@ -2563,6 +2563,1437 @@ Unix date: &lt;t:1917043200:D&gt;
 <p>You can use <a href="https://wiki.botdesignerdiscord.com/nightl/resources/discordTimestamps.md">Discord timestamp highlighting</a> to make your code look nicer!</p>
 </div>
 </div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="escaper"><a class="header" href="#escaper">Escaper</a></h1>
+<style>
+.editPage {
+	visibility: hidden;
+}
+.picker-container {
+    background: var(--card-bg);
+	border-radius: var(--border-radius);
+	border: 1px solid rgba(255, 255, 255, 0.05);
+	margin-top: 1.5rem;
+	padding-bottom: 0rem;
+	padding-left: 1.5rem;
+	padding-right: 1.5rem;
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+}
+.picker-container h2 {
+    margin-top: -.5rem;
+    padding-top: 1.5rem;
+}
+.picker-container p {
+	margin-top: -1.5rem;
+}
+.textarea-row {
+	display: block;
+	margin: 1rem 0;
+}
+.escaper-input, .escaper-output {
+    color: #fff;
+    padding: 1rem;
+    background: hsl(0deg 0% 100% / 7%);
+    border-radius: var(--border-radius);
+	border-width: 0;
+    font-family: monospace;
+    font-size: 1.5rem ;
+    line-height: 1.5;
+    height: 16rem;
+    width: 100%;
+    outline: none;
+	resize: vertical;
+	transition: all 0.3s;
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+	margin-bottom: 1rem;
+}
+.escaper-input:focus {
+	box-shadow: 0 0 0 3px rgba(255,255,255,0.3), 0 8px 15px rgba(0, 0, 0, 0.4);
+}
+.escaper-output {
+    background: hsl(0deg 0% 100% / 7%);
+    min-height: 16rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: #fff;
+}
+.btn-row {
+	display: flex;
+	gap: 1rem;
+	margin: 1rem 0;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+.escape-btn, .copy-btn, .clear-btn {
+	outline: none;
+	touch-action: manipulation;
+	-webkit-user-select: none;
+	user-select: none;
+	padding-left: 1rem;
+	padding-right: 1rem;
+	height: 4rem;
+	border: none;
+	border-radius: var(--border-radius);
+	cursor: pointer;
+	font-size: 1.5rem ;
+	color: #fff;
+	background: hsl(0deg 0% 100% / 7%);
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+	transition: all 0.3s;
+	font-weight: 500;
+}
+.escape-btn {
+	background: hsl(0deg 0% 100% / 7%);
+	font-weight: 500;
+	padding-left: 1.5rem;
+	padding-right: 1.5rem;
+	font-size: 1.5rem ;
+	height: 4rem ;
+}
+.escape-btn:hover, .copy-btn:hover, .clear-btn:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+}
+.error {
+	color: var(--error);
+	font-size: 1.2rem;
+	min-height: 1rem;
+	padding: 0;
+	margin: 0;
+}
+.char-count {
+    color: #aaa;
+    font-size: 1.2rem;
+    margin-top: 0.5rem;
+}
+
+.highlight-span {
+	background: hsl(0deg 0% 100% / 10%);
+	color: #fff;
+	padding: 0.5rem 0.75rem;
+	border-radius: 6px;
+	font-family: monospace;
+	font-weight: bold;
+	font-size: 1.3rem;
+}
+.output-span {
+	background: hsl(0deg 0% 100% / 10%);
+	padding: 0.5rem 0.75rem;
+	border-radius: 6px;
+	font-family: monospace;
+	font-size: 1.3rem;
+	color: #fff;
+}
+</style>
+<p>Here you can escape special characters to use in ur code.</p>
+<div id="admonition-note" class="admonition admonish-note" role="note" aria-labelledby="admonition-note-title">
+<div class="admonition-title">
+<div id="admonition-note-title">
+<p>Note</p>
+</div>
+<a class="admonition-anchor-link" href="tools/escaper.html#admonition-note"></a>
+</div>
+<div>
+<p>Escape characters are used to treat special symbols as plain text instead of triggering functions. This lets your bot return characters like <span class="highlight-span">;</span>, <span class="highlight-span">$</span>, <span class="highlight-span">]</span>, <span class="highlight-span">\</span> inside your message without breaking the script.</p>
+</div>
+</div>
+<div class="picker-container">
+	<h2 id="character-escaper"><a class="header" href="#character-escaper">Character Escaper</a></h2>
+  	<p>Paste text to escape. Click Escape Code to process.</p>
+  	<div class="textarea-row">
+    	<textarea id="inputText" class="escaper-input" placeholder="Original text..."></textarea>
+    	<textarea id="outputText" class="escaper-output" readonly placeholder="Escaped text..."></textarea>
+  	</div>
+  	<div class="btn-row">
+    	<button id="escapeBtn" class="escape-btn">Escape Code</button>
+    	<button id="copyBtn" class="copy-btn">Copy Output</button>
+    	<button id="clearBtn" class="clear-btn">Clear</button>
+  	</div>
+  	<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-bottom: 1.5rem;">
+    	<div class="char-count" id="charCount">0 / 0 characters</div>
+    	<div class="error" id="errorText" style="margin: 0; flex-shrink: 0;"></div>
+  	</div>
+</div>
+<h2 id="escaping-rules"><a class="header" href="#escaping-rules">Escaping Rules</a></h2>
+<div id="admonition-note-1" class="admonition admonish-note" role="note" aria-labelledby="admonition-note-1-title">
+<div class="admonition-title">
+<div id="admonition-note-1-title">
+<p>Note</p>
+</div>
+<a class="admonition-anchor-link" href="tools/escaper.html#admonition-note-1"></a>
+</div>
+<div>
+<p>These characters are changed:</p>
+<p><span class="highlight-span">$</span> → <span class="output-span">%{DOL}%</span></p>
+<p><span class="highlight-span">]</span> → <span class="output-span">\]</span></p>
+<p><span class="highlight-span">;</span> → <span class="output-span">\;</span></p>
+<p><span class="highlight-span">\</span> → <span class="output-span">\\</span></p>
+</div>
+</div>
+<h2 id="functions-2"><a class="header" href="#functions-2">Functions</a></h2>
+<div id="admonition-note-2" class="admonition admonish-note" role="note" aria-labelledby="admonition-note-2-title">
+<div class="admonition-title">
+<div id="admonition-note-2-title">
+<p>Note</p>
+</div>
+<a class="admonition-anchor-link" href="tools/escaper.html#admonition-note-2"></a>
+</div>
+<div>
+<p>Use in BDFD functions like <a href="https://wiki.botdesignerdiscord.com/nightly/bdscript/sendMessage.md"><code>$sendMessage[]</code></a>, <a href="https://wiki.botdesignerdiscord.com/nightly/guides/general/bds2/asyncScopes.md"><code>$async[]</code></a>, embeds, etc.</p>
+</div>
+</div>
+<h2 id="example-2"><a class="header" href="#example-2">Example</a></h2>
+<pre><code>$nomention
+$sendMessage[[%{DOL}%Hello\\; this is pretty cool\\; right%{DOL}%\\]]
+</code></pre>
+<discord-messages>
+    <discord-message role-color="#ffffff" author="Zubariel">
+        !example
+    </discord-message>
+    <discord-message role-color="#378afa" bot verified author="BDFD Support">
+        [$Hello; this is pretty cool; right$]
+    </discord-message>
+</discord-messages>
+<div id="admonition-how-to-use" class="admonition admonish-question" role="note" aria-labelledby="admonition-how-to-use-title">
+<div class="admonition-title">
+<div id="admonition-how-to-use-title">
+<p>How to use?</p>
+</div>
+<a class="admonition-anchor-link" href="tools/escaper.html#admonition-how-to-use"></a>
+</div>
+<div>
+<p>Paste text → Escape Code → Copy Output → Paste in BDFD.</p>
+</div>
+</div>
+<script>
+function escapeBDFD(text) {
+  return text
+    .replace(/\\/g, '\\\\')
+    .replace(/\$/g, '%{DOL}%')
+    .replace(/\]/g, '\\]')
+    .replace(/;/g, '\\;');
+}
+<p>document.addEventListener(‘DOMContentLoaded’, function() {
+const input = document.getElementById(‘inputText’);
+const output = document.getElementById(‘outputText’);
+const escapeBtn = document.getElementById(‘escapeBtn’);
+const copyBtn = document.getElementById(‘copyBtn’);
+const clearBtn = document.getElementById(‘clearBtn’);
+const charCount = document.getElementById(‘charCount’);
+const errorText = document.getElementById(‘errorText’);</p>
+<p>function updateCharCount() {
+const inLen = input.value.length;
+const outLen = output.value.length;
+charCount.textContent = <code>${inLen} / ${outLen} characters</code>;
+}</p>
+<p>escapeBtn.onclick = function() {
+errorText.textContent = ‘’;
+const text = input.value;
+if (!text.trim()) {
+errorText.textContent = ‘Enter text to escape’;
+return;
+}
+output.value = escapeBDFD(text);
+updateCharCount();
+escapeBtn.style.transform = ‘scale(0.95)’;
+setTimeout(() =&gt; { escapeBtn.style.transform = ‘’; }, 150);
+};</p>
+<p>copyBtn.onclick = function() {
+const text = output.value;
+if (!text.trim()) {
+errorText.textContent = ‘Nothing to copy’;
+return;
+}
+navigator.clipboard.writeText(text).then(() =&gt; {
+const original = copyBtn.textContent;
+copyBtn.textContent = ‘Copied!’;
+copyBtn.style.background = ‘hsl(120deg 100% 30%)’;
+setTimeout(() =&gt; {
+copyBtn.textContent = original;
+copyBtn.style.background = ‘’;
+}, 2000);
+}).catch(() =&gt; {
+errorText.textContent = ‘Copy failed’;
+});
+};</p>
+<p>clearBtn.onclick = function() {
+input.value = ‘’;
+output.value = ‘’;
+updateCharCount();
+errorText.textContent = ‘’;
+};</p>
+<p>input.oninput = updateCharCount;
+});
+</script></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="embed-builder"><a class="header" href="#embed-builder">Embed Builder</a></h1>
+<style>
+.editPage {
+	visibility: hidden;
+}
+.picker-container {
+    background: var(--card-bg);
+	border-radius: var(--border-radius);
+	border: 1px solid rgba(255, 255, 255, 0.05);
+	margin-top: 1.5rem;
+	padding-bottom: 0rem;
+	padding-left: 1.5rem;
+	padding-right: 1.5rem;
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+}
+.picker-container h2 {
+    margin-top: -.5rem;
+    padding-top: 1.5rem;
+}
+.picker-container p {
+	margin-top: -1.5rem;
+}
+.form-group {
+	margin-bottom: 1.5rem;
+} 
+.form-group label {
+	display: block;
+	font-size: 1.3rem ;
+	font-weight: 500;
+	margin-bottom: 0.75rem;
+	color: rgba(255, 255, 255, 0.9);
+	letter-spacing: 0.01em;
+}
+.form-row {
+	display: grid;
+	gap: 1rem;
+	grid-template-columns: 1fr;
+}
+@media (min-width: 640px) {
+	.form-row {
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	}
+}
+.form-input {
+    color: #fff;
+    padding: 1rem;
+    background: hsl(0deg 0% 100% / 7%);
+    border-radius: var(--border-radius);
+	border-width: 0;
+    font-family: monospace;
+    font-size: 1.5rem ;
+    line-height: 1.5;
+    width: 100%;
+    outline: none;
+	transition: all 0.3s;
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+}
+.form-input:focus {
+	box-shadow: 0 0 0 3px rgba(255,255,255,0.3), 0 8px 15px rgba(0, 0, 0, 0.4);
+}
+.form-textarea {
+    min-height: 10rem;
+    resize: vertical;
+}
+.form-checkbox {
+	width: 1.2rem;
+	height: 1.2rem;
+	border-radius: 0.25rem;
+	background: hsl(0deg 0% 100% / 10%);
+	border: 1px solid rgba(255,255,255,0.2);
+	cursor: pointer;
+	margin: 0;
+}
+.form-checkbox:checked {
+	background: hsl(120deg 70% 50%);
+	border-color: hsl(120deg 70% 60%);
+}
+.checkbox-label {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-top: 0.75rem;
+	cursor: pointer;
+	user-select: none;
+}
+.checkbox-label span {
+	font-size: 1.3rem ;
+	color: rgba(255, 255, 255, 0.9);
+	font-weight: 400;
+}
+.btn-row {
+	display: flex;
+	gap: 1rem;
+	margin-top: 1.5rem;
+	margin-bottom: 1.5rem;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+.generate-btn, .copy-btn, .clear-btn {
+	outline: none;
+	touch-action: manipulation;
+	-webkit-user-select: none;
+	user-select: none;
+	padding-left: 1rem;
+	padding-right: 1rem;
+	height: 4rem;
+	border: none;
+	border-radius: var(--border-radius);
+	cursor: pointer;
+	font-weight: 500;
+	transition: all 0.3s;
+	color: #fff;
+	background: hsl(0deg 0% 100% / 7%);
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+	font-size: 1.5rem ;
+}
+.generate-btn {
+	background: hsl(0deg 0% 100% / 7%);
+	font-weight: 500;
+	font-size: 1.5rem ;
+	padding-left: 1.5rem;
+	padding-right: 1.5rem;
+	height: 4rem ;
+}
+.generate-btn:hover, .copy-btn:hover, .clear-btn:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+}
+.output {
+    background: hsl(0deg 0% 100% / 7%);
+    border-width: 0;
+    min-height: 16rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: #fff;
+    font-family: monospace ;
+    font-size: 1.5rem ;
+    line-height: 1.5;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    margin-top: 0;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+}
+.error {
+	color: var(--error);
+	font-size: 1rem ;
+	min-height: 1rem;
+	margin-top: 0.5rem;
+}
+.char-count {
+    color: #aaa;
+    font-size: 1.2rem ;
+    margin-top: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+.add-field-btn {
+	outline: none;
+	touch-action: manipulation;
+	-webkit-user-select: none;
+	user-select: none;
+	background: hsl(0deg 0% 100% / 7%);
+	padding-left: 1rem;
+	padding-right: 1rem;
+	height: 4rem;
+	font-size: 1.5rem ;
+	font-weight: 500;
+	border-radius: var(--border-radius);
+	color: #fff;
+	border: none;
+	cursor: pointer;
+	margin-right: 0.5rem;
+	margin-bottom: 0.5rem;
+	transition: all 0.3s;
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+}
+.add-field-btn:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+}
+.field-row, .button-row, .select-row, .modal-row {
+	background: hsl(0deg 0% 100% / 5%);
+	border-radius: var(--border-radius);
+	padding: 1rem;
+	margin-bottom: 1rem;
+	margin-top: 1rem;
+	border: 1px solid rgba(255,255,255,0.08);
+}
+.remove-btn {
+	background: hsl(0deg 0% 50% / 30%);
+	color: #fff;
+	border: none;
+	padding: 0.625rem 1rem;
+	border-radius: var(--border-radius);
+	cursor: pointer;
+	font-size: 1rem ;
+	font-weight: 500;
+	transition: all 0.2s;
+}
+.remove-btn:hover {
+	background: hsl(0deg 0% 60% / 40%);
+}
+.flex-buttons {
+	display: flex;
+	gap: 0;
+	flex-wrap: wrap;
+	margin-top: 1rem;
+}
+</style>
+<p>Here you can make embeds using the respective text inputs.</p>
+<div id="admonition-note" class="admonition admonish-note" role="note" aria-labelledby="admonition-note-title">
+<div class="admonition-title">
+<div id="admonition-note-title">
+<p>Note</p>
+</div>
+<a class="admonition-anchor-link" href="tools/embed.html#admonition-note"></a>
+</div>
+<div>
+<p>Embed Builder creates Discord embeds with titles, descriptions, fields, buttons, select menus,  modals, and more.</p>
+</div>
+</div>
+<div class="picker-container">
+	<h2 id="embed-builder-1"><a class="header" href="#embed-builder-1">Embed Builder</a></h2>
+  	<p>Fill text input fields below to generate embed code.</p>
+<div class="form-group">
+     <label>Author</label>
+     <div class="form-row">
+       <input id="authorName" class="form-input" placeholder="Author Name">
+       <input id="authorIcon" class="form-input" placeholder="Author Icon URL">
+       <input id="authorUrl" class="form-input" placeholder="Author URL">
+     </div>
+   </div>
+<div class="form-group">
+     <label>Title</label>
+     <div class="form-row">
+       <input id="title" class="form-input" placeholder="Title">
+       <input id="titleUrl" class="form-input" placeholder="Title URL">
+     </div>
+   </div>
+<div class="form-group">
+     <label>Description</label>
+     <textarea id="description" class="form-input form-textarea" placeholder="Description..."></textarea>
+   </div>
+<div class="form-group">
+     <label>Media & Style</label>
+     <div class="form-row">
+       <input id="thumbnail" class="form-input" placeholder="Thumbnail URL">
+       <input id="image" class="form-input" placeholder="Image URL">
+       <input id="color" class="form-input" placeholder="#ffffff" value="#7289da">
+     </div>
+   </div>
+<div class="form-group">
+     <label>Footer</label>
+     <div class="form-row">
+       <input id="footer" class="form-input" placeholder="Footer Text">
+       <input id="footerIcon" class="form-input" placeholder="Footer Icon URL">
+     </div>
+     <label class="checkbox-label">
+       <input type="checkbox" id="timestamp" class="form-checkbox">
+       <span>Add Timestamp</span>
+     </label>
+   </div>
+<div class="flex-buttons">
+     <button id="addField" class="add-field-btn">+ Field</button>
+     <button id="addButton" class="add-field-btn">+ Button</button>
+     <button id="addSelect" class="add-field-btn">+ Select Menu</button>
+     <button id="addModal" class="add-field-btn">+ Modal</button>
+   </div>
+<div id="dynamicFields"></div>
+<div class="btn-row">
+     <button id="generateBtn" class="generate-btn">Generate Embed</button>
+     <button id="copyBtn" class="copy-btn">Copy Output</button>
+     <button id="clearBtn" class="clear-btn">Clear All</button>
+   </div>
+<div id="output" class="output">Generated code appears here...</div>
+   <div class="char-count" id="charCount">0 characters</div>
+   <div class="error" id="error"></div>
+</div>
+<h2 id="functions-3"><a class="header" href="#functions-3">Functions</a></h2>
+<div id="admonition-note-1" class="admonition admonish-note" role="note" aria-labelledby="admonition-note-1-title">
+<div class="admonition-title">
+<div id="admonition-note-1-title">
+<p>Note</p>
+</div>
+<a class="admonition-anchor-link" href="tools/embed.html#admonition-note-1"></a>
+</div>
+<div>
+<p>Generated code uses standard BDFD embed functions.</p>
+</div>
+</div>
+<p><strong>Core</strong>:</p>
+<ul>
+<li><a href="https://wiki.botdesignerdiscord.com/nightly/bdscript/title.md"><code>$title[]</code></a>, <a href="https://wiki.botdesignerdiscord.com/nightly/bdscript/description.md"><code>$description[]</code></a>, <a href="https://wiki.botdesignerdiscord.com/nightly/bdscript/color.md"><code>$color[]</code></a>, <a href="https://wiki.botdesignerdiscord.com/nightly/bdscript/image.md"><code>$image[]</code></a>, <a href="https://wiki.botdesignerdiscord.com/nightly/bdscript/thumbnail.md"><code>$thumbnail[]</code></a></li>
+<li><a href="https://wiki.botdesignerdiscord.com/nightly/bdscript/addField.md"><code>$addField[]</code></a>, <a href="https://wiki.botdesignerdiscord.com/nightly/bdscript/addButton.md"><code>$addButton[]</code></a>, <a href="https://wiki.botdesignerdiscord.com/nightly/bdscript/addSelectMenuOption.md"><code>$addSelectMenuOption[]</code></a></li>
+<li><a href="https://wiki.botdesignerdiscord.com/nightly/bdscript/newModal.md"><code>$newModal[]</code></a>, <a href="https://wiki.botdesignerdiscord.com/nightly/bdscript/addTextInput.md"><code>$addTextInput[]</code></a></li>
+</ul>
+<h2 id="example-3"><a class="header" href="#example-3">Example</a></h2>
+<pre><code>$nomention
+$title[Hello]
+$description[Welcome to embed builder.]
+$color[#673ab7]
+</code></pre>
+<discord-messages>
+    <discord-message author="Zubariel" role-color="#ffffff">
+        !example
+    </discord-message>
+    <discord-message bot author="BDFD Support" role-color="#378afa" verified>
+        <none>
+        <discord-embed slot="embeds" embed-title="Hello" color="#673ab7">
+            <discord-embed-description slot="description">
+                Welcome to embed builder.
+            </discord-embed-description>
+        </discord-embed>
+    </discord-message>
+</discord-messages>
+<div id="admonition-how-it-works" class="admonition admonish-question" role="note" aria-labelledby="admonition-how-it-works-title">
+<div class="admonition-title">
+<div id="admonition-how-it-works-title">
+<p>How it works?</p>
+</div>
+<a class="admonition-anchor-link" href="tools/embed.html#admonition-how-it-works"></a>
+</div>
+<div>
+<p>Fill form → Generate → Copy code → Paste in BDFD commands.</p>
+</div>
+</div>
+<script>
+let fieldCount = 0, buttonCount = 0, selectCount = 0, modalCount = 0;
+<p>document.addEventListener(‘DOMContentLoaded’, () =&gt; {
+const generateBtn = document.getElementById(‘generateBtn’);
+const copyBtn = document.getElementById(‘copyBtn’);
+const clearBtn = document.getElementById(‘clearBtn’);
+const addField = document.getElementById(‘addField’);
+const addButton = document.getElementById(‘addButton’);
+const addSelect = document.getElementById(‘addSelect’);
+const addModal = document.getElementById(‘addModal’);
+const output = document.getElementById(‘output’);
+const charCount = document.getElementById(‘charCount’);
+const error = document.getElementById(‘error’);
+const dynamicFields = document.getElementById(‘dynamicFields’);</p>
+<p>generateBtn.onclick = generateEmbed;
+copyBtn.onclick = copyOutput;
+clearBtn.onclick = clearAll;
+addField.onclick = () =&gt; addFieldRow();
+addButton.onclick = () =&gt; addButtonRow();
+addSelect.onclick = () =&gt; addSelectRow();
+addModal.onclick = () =&gt; addModalRow();</p>
+<p>function sanitize(str) {
+if (!str) return ‘’;
+return str
+.replace(/\/g, ‘\\’)
+.replace(/$/g, ‘%{DOL}%’)
+.replace(/;/g, ‘\;’)
+.replace(/]/g, ‘\]’);
+}</p>
+<p>function generateEmbed() {
+error.textContent = ‘’;
+let code = ‘$nomention\n’;</p>
+<pre><code>// Author
+const authorName = sanitize(document.getElementById('authorName').value);
+const authorIcon = sanitize(document.getElementById('authorIcon').value);
+const authorUrl = sanitize(document.getElementById('authorUrl').value);
+if (authorName) {
+  code += `$author[${authorName}`;
+  if (authorIcon) code += `;${authorIcon}`;
+  if (authorUrl) code += `;${authorUrl}`;
+  code += ']\n';
+}
+
+// Title
+const title = sanitize(document.getElementById('title').value);
+const titleUrl = sanitize(document.getElementById('titleUrl').value);
+if (title) {
+  code += `$title[${title}`;
+  if (titleUrl) code += `;${titleUrl}`;
+  code += ']\n';
+}
+
+// Description
+const desc = sanitize(document.getElementById('description').value);
+if (desc) code += `$description[${desc}]\n`;
+
+// Thumbnail
+const thumbnail = sanitize(document.getElementById('thumbnail').value);
+if (thumbnail) code += `$thumbnail[${thumbnail}]\n`;
+
+// Image
+const image = sanitize(document.getElementById('image').value);
+if (image) code += `$image[${image}]\n`;
+
+// Color
+const color = document.getElementById('color').value || '#7289da';
+code += `$color[${color}]\n`;
+
+// Footer
+const footer = sanitize(document.getElementById('footer').value);
+const footerIcon = sanitize(document.getElementById('footerIcon').value);
+if (footer) {
+  code += `$footer[${footer}`;
+  if (footerIcon) code += `;${footerIcon}`;
+  code += ']\n';
+}
+
+// Timestamp
+if (document.getElementById('timestamp').checked) code += '$addTimestamp\n';
+
+// Dynamic fields
+document.querySelectorAll('.field-row').forEach(row =&gt; {
+  const name = sanitize(row.querySelector('.field-name')?.value);
+  const value = sanitize(row.querySelector('.field-value')?.value);
+  const inline = row.querySelector('.field-inline')?.checked ? 'yes' : 'no';
+  if (name &amp;&amp; value) code += `$addField[${name};${value};${inline}]\n`;
+});
+
+// Buttons
+document.querySelectorAll('.button-row').forEach(row =&gt; {
+  const label = sanitize(row.querySelector('.button-label')?.value);
+  const customId = sanitize(row.querySelector('.button-id')?.value);
+  const style = row.querySelector('.button-style')?.value || 'primary';
+  const disabled = row.querySelector('.button-disabled')?.checked ? 'yes' : 'no';
+  const emoji = sanitize(row.querySelector('.button-emoji')?.value);
+  const url = sanitize(row.querySelector('.button-url')?.value);
+  
+  if (label || emoji) {
+    if (style === 'link' &amp;&amp; url) {
+      code += `$addButton[1;${label || 'Link'};${url};${disabled};${emoji}]\n`;
+    } else if (customId) {
+      const styleNum = {primary: 1, secondary: 2, success: 3, danger: 4}[style] || 1;
+      code += `$addButton[no;${label};${styleNum};${customId};${disabled};${emoji}]\n`;
+    }
+  }
+});
+
+// Select menus
+document.querySelectorAll('.select-row').forEach(row =&gt; {
+  const placeholder = sanitize(row.querySelector('.select-placeholder')?.value);
+  const customId = sanitize(row.querySelector('.select-id')?.value);
+  const minValues = row.querySelector('.select-min')?.value || '1';
+  const maxValues = row.querySelector('.select-max')?.value || '1';
+  
+  if (customId) {
+    code += `$addSelectMenu[${customId};${placeholder || 'Select an option'};${minValues};${maxValues}]\n`;
+    
+    row.querySelectorAll('.select-option').forEach(opt =&gt; {
+      const label = sanitize(opt.querySelector('.option-label')?.value);
+      const value = sanitize(opt.querySelector('.option-value')?.value);
+      const desc = sanitize(opt.querySelector('.option-desc')?.value);
+      const emoji = sanitize(opt.querySelector('.option-emoji')?.value);
+      
+      if (label &amp;&amp; value) {
+        code += `$addSelectMenuOption[${customId};${label};${value};${desc};${emoji}]\n`;
+      }
+    });
+  }
+});
+
+// Modals
+document.querySelectorAll('.modal-row').forEach(row =&gt; {
+  const title = sanitize(row.querySelector('.modal-title')?.value);
+  const customId = sanitize(row.querySelector('.modal-id')?.value);
+  
+  if (title &amp;&amp; customId) {
+    code += `$newModal[${customId};${title}]\n`;
+    
+    row.querySelectorAll('.modal-input').forEach(input =&gt; {
+      const label = sanitize(input.querySelector('.input-label')?.value);
+      const id = sanitize(input.querySelector('.input-id')?.value);
+      const style = input.querySelector('.input-style')?.value || 'short';
+      const required = input.querySelector('.input-required')?.checked ? 'yes' : 'no';
+      const placeholder = sanitize(input.querySelector('.input-placeholder')?.value);
+      
+      if (label &amp;&amp; id) {
+        code += `$addTextInput[${id};${style};${label};${required};${placeholder}]\n`;
+      }
+    });
+  }
+});
+
+output.textContent = code.trim();
+charCount.textContent = output.textContent.length + ' characters';
+</code></pre>
+<p>}</p>
+<p>function copyOutput() {
+if (!output.textContent || output.textContent === ‘Generated code appears here…’) {
+error.textContent = ‘Nothing to copy’;
+return;
+}</p>
+<pre><code>navigator.clipboard.writeText(output.textContent).then(() =&gt; {
+  const original = copyBtn.textContent;
+  copyBtn.textContent = 'Copied!';
+  copyBtn.style.background = 'hsl(120deg 100% 30%)';
+  setTimeout(() =&gt; {
+    copyBtn.textContent = original;
+    copyBtn.style.background = '';
+  }, 2000);
+}).catch(() =&gt; {
+  error.textContent = 'Copy failed';
+});
+</code></pre>
+<p>}</p>
+<p>function clearAll() {
+document.querySelectorAll(‘.form-input, .form-textarea’).forEach(input =&gt; {
+if (input.id === ‘color’) {
+input.value = ‘#7289da’;
+} else {
+input.value = ‘’;
+}
+});
+document.querySelectorAll(‘.form-checkbox’).forEach(cb =&gt; cb.checked = false);
+dynamicFields.innerHTML = ‘’;
+fieldCount = 0;
+buttonCount = 0;
+selectCount = 0;
+modalCount = 0;
+output.textContent = ‘Generated code appears here…’;
+charCount.textContent = ‘0 characters’;
+error.textContent = ‘’;
+}</p>
+<p>function addFieldRow() {
+const row = document.createElement(‘div’);
+row.className = ‘field-row’;
+row.innerHTML = <code>      &lt;div class="form-row"&gt;         &lt;input class="form-input field-name" placeholder="Field Name"&gt;         &lt;input class="form-input field-value" placeholder="Field Value"&gt;       &lt;/div&gt;       &lt;div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem;"&gt;         &lt;label class="checkbox-label" style="margin: 0;"&gt;           &lt;input type="checkbox" class="form-checkbox field-inline"&gt;           &lt;span&gt;Inline&lt;/span&gt;         &lt;/label&gt;         &lt;button class="remove-btn"&gt;Remove&lt;/button&gt;       &lt;/div&gt;    </code>;
+dynamicFields.appendChild(row);
+row.querySelector(‘.remove-btn’).onclick = () =&gt; row.remove();
+}</p>
+<p>function addButtonRow() {
+const row = document.createElement(‘div’);
+row.className = ‘button-row’;
+row.innerHTML = <code>      &lt;div class="form-row"&gt;         &lt;input class="form-input button-label" placeholder="Button Label"&gt;         &lt;input class="form-input button-id" placeholder="Custom ID"&gt;         &lt;select class="form-input button-style"&gt;           &lt;option value="primary"&gt;Primary&lt;/option&gt;           &lt;option value="secondary"&gt;Secondary&lt;/option&gt;           &lt;option value="success"&gt;Success&lt;/option&gt;           &lt;option value="danger"&gt;Danger&lt;/option&gt;           &lt;option value="link"&gt;Link&lt;/option&gt;         &lt;/select&gt;       &lt;/div&gt;       &lt;div class="form-row" style="margin-top: 0.75rem;"&gt;         &lt;input class="form-input button-emoji" placeholder="Emoji"&gt;         &lt;input class="form-input button-url" placeholder="URL (for Link style)"&gt;       &lt;/div&gt;       &lt;div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem;"&gt;         &lt;label class="checkbox-label" style="margin: 0;"&gt;           &lt;input type="checkbox" class="form-checkbox button-disabled"&gt;           &lt;span&gt;Disabled&lt;/span&gt;         &lt;/label&gt;         &lt;button class="remove-btn"&gt;Remove&lt;/button&gt;       &lt;/div&gt;    </code>;
+dynamicFields.appendChild(row);
+row.querySelector(‘.remove-btn’).onclick = () =&gt; row.remove();
+}</p>
+<p>function addSelectRow() {
+const row = document.createElement(‘div’);
+row.className = ‘select-row’;
+row.innerHTML = <code>      &lt;div class="form-row"&gt;         &lt;input class="form-input select-placeholder" placeholder="Placeholder"&gt;         &lt;input class="form-input select-id" placeholder="Custom ID"&gt;         &lt;input class="form-input select-min" type="number" placeholder="Min Values" value="1" min="1"&gt;         &lt;input class="form-input select-max" type="number" placeholder="Max Values" value="1" min="1"&gt;       &lt;/div&gt;       &lt;div class="options-container" style="margin-top: 1rem;"&gt;&lt;/div&gt;       &lt;div style="display: flex; gap: 0.75rem; margin-top: 0.75rem;"&gt;         &lt;button class="add-field-btn add-option-btn"&gt;+ Option&lt;/button&gt;         &lt;button class="remove-btn"&gt;Remove Menu&lt;/button&gt;       &lt;/div&gt;    </code>;
+dynamicFields.appendChild(row);</p>
+<pre><code>const optionsContainer = row.querySelector('.options-container');
+row.querySelector('.add-option-btn').onclick = () =&gt; {
+  const option = document.createElement('div');
+  option.className = 'select-option';
+  option.innerHTML = `
+    &lt;div class="form-row" style="margin-top: 0.5rem;"&gt;
+      &lt;input class="form-input option-label" placeholder="Label"&gt;
+      &lt;input class="form-input option-value" placeholder="Value"&gt;
+      &lt;input class="form-input option-desc" placeholder="Description"&gt;
+      &lt;input class="form-input option-emoji" placeholder="Emoji"&gt;
+    &lt;/div&gt;
+  `;
+  optionsContainer.appendChild(option);
+};
+row.querySelector('.remove-btn').onclick = () =&gt; row.remove();
+</code></pre>
+<p>}</p>
+<p>function addModalRow() {
+const row = document.createElement(‘div’);
+row.className = ‘modal-row’;
+row.innerHTML = <code>      &lt;div class="form-row"&gt;         &lt;input class="form-input modal-title" placeholder="Modal Title"&gt;         &lt;input class="form-input modal-id" placeholder="Custom ID"&gt;       &lt;/div&gt;       &lt;div class="modal-inputs-container" style="margin-top: 1rem;"&gt;&lt;/div&gt;       &lt;div style="display: flex; gap: 0.75rem; margin-top: 0.75rem;"&gt;         &lt;button class="add-field-btn add-modal-input-btn"&gt;+ Text Input&lt;/button&gt;         &lt;button class="remove-btn"&gt;Remove Modal&lt;/button&gt;       &lt;/div&gt;    </code>;
+dynamicFields.appendChild(row);</p>
+<pre><code>const inputsContainer = row.querySelector('.modal-inputs-container');
+row.querySelector('.add-modal-input-btn').onclick = () =&gt; {
+  const input = document.createElement('div');
+  input.className = 'modal-input';
+  input.innerHTML = `
+    &lt;div class="form-row" style="margin-top: 0.5rem;"&gt;
+      &lt;input class="form-input input-label" placeholder="Label"&gt;
+      &lt;input class="form-input input-id" placeholder="Input ID"&gt;
+      &lt;select class="form-input input-style"&gt;
+        &lt;option value="short"&gt;Short&lt;/option&gt;
+        &lt;option value="paragraph"&gt;Paragraph&lt;/option&gt;
+      &lt;/select&gt;
+      &lt;input class="form-input input-placeholder" placeholder="Placeholder"&gt;
+    &lt;/div&gt;
+    &lt;label class="checkbox-label"&gt;
+      &lt;input type="checkbox" class="form-checkbox input-required" checked&gt;
+      &lt;span&gt;Required&lt;/span&gt;
+    &lt;/label&gt;
+  `;
+  inputsContainer.appendChild(input);
+};
+row.querySelector('.remove-btn').onclick = () =&gt; row.remove();
+</code></pre>
+<p>}
+});
+</script></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="highlighter"><a class="header" href="#highlighter">Highlighter</a></h1>
+<style>
+.editPage {
+	visibility: hidden;
+}
+.picker-container {
+    background: var(--card-bg);
+	border-radius: var(--border-radius);
+	border: 1px solid rgba(255, 255, 255, 0.05);
+	margin-top: 1.5rem;
+	padding-bottom: 0rem;
+	padding-left: 1.5rem;
+	padding-right: 1.5rem;
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+}
+.picker-container h2 {
+    margin-top: -.5rem;
+    padding-top: 1.5rem;
+}
+.picker-container p {
+	margin-top: -1.5rem;
+}
+.control-bar {
+	display: flex;
+	gap: 1rem;
+	margin-bottom: 1.5rem;
+	flex-wrap: wrap;
+}
+.control-btn {
+	outline: none;
+	touch-action: manipulation;
+	user-select: none;
+	padding-left: 1rem;
+	padding-right: 1rem;
+	height: 4rem;
+	border: none;
+	border-radius: var(--border-radius);
+	cursor: pointer;
+	font-size: 1.5rem;
+	color: #fff;
+	background: hsl(0deg 0% 100% / 7%);
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+	transition: all 0.3s;
+	font-weight: 500;
+	flex: 1;
+	min-width: 150px;
+}
+.control-btn:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+}
+.function-selector-wrapper {
+	position: relative;
+	flex: 1;
+	min-width: 150px;
+}
+.function-dropdown {
+	position: absolute;
+	top: calc(100% + 0.5rem);
+	left: 0;
+	right: 0;
+	background: var(--card-bg);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: var(--border-radius);
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+	max-height: 300px;
+	overflow-y: auto;
+	z-index: 100;
+	display: none;
+}
+.function-dropdown.active {
+	display: block;
+}
+.function-search {
+	width: 100%;
+	padding: 0.75rem;
+	background: hsl(0deg 0% 100% / 10%);
+	border: none;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+	color: #fff;
+	font-size: 1rem;
+	outline: none;
+}
+.function-list {
+	max-height: 240px;
+	overflow-y: auto;
+}
+.function-item {
+	padding: 0.75rem 1rem;
+	color: #fff;
+	cursor: pointer;
+	transition: background 0.2s;
+	
+	font-size: 1rem;
+}
+.function-item:hover {
+	background: hsl(0deg 0% 100% / 10%);
+}
+.functions-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+	gap: 1rem;
+	margin-bottom: 1.5rem;
+}
+.function-card {
+	background: hsl(0deg 0% 100% / 7%);
+	border-radius: var(--border-radius);
+	padding: 1rem;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+}
+.function-info {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	flex: 1;
+	min-width: 0;
+}
+.color-badge {
+	width: 2rem;
+	height: 2rem;
+	border-radius: 50%;
+	flex-shrink: 0;
+	border: 2px solid rgba(255, 255, 255, 0.2);
+}
+.function-name {
+	font-size: 1.1rem;
+	color: #fff;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.function-actions {
+	display: flex;
+	gap: 0.5rem;
+	flex-shrink: 0;
+}
+.action-btn {
+	background: none;
+	border: none;
+	color: rgba(255, 255, 255, 0.6);
+	cursor: pointer;
+	font-size: 1.1rem;
+	padding: 0.25rem;
+	transition: all 0.2s;
+	width: 1.75rem;
+	height: 1.75rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.action-btn:hover {
+	color: #fff;
+}
+.btn-row {
+	display: flex;
+	gap: 1rem;
+	margin: 1.5rem 0;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+.btn-secondary {
+	outline: none;
+	touch-action: manipulation;
+	user-select: none;
+	padding-left: 1.5rem;
+	padding-right: 1.5rem;
+	height: 4rem;
+	border: none;
+	border-radius: var(--border-radius);
+	cursor: pointer;
+	font-size: 1.5rem;
+	color: #fff;
+	background: hsl(0deg 0% 100% / 7%);
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+	transition: all 0.3s;
+	font-weight: 500;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+}
+.btn-secondary:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+}
+.output-container {
+	background: hsl(0deg 0% 100% / 7%);
+	border-radius: var(--border-radius);
+	overflow: hidden;
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+}
+.output-header {
+	background: hsl(0deg 0% 100% / 5%);
+	padding: 1rem;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.output-title {
+	font-size: 1.5rem;
+	font-weight: 600;
+	color: #fff;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+.copy-output-btn {
+	background: none;
+	border: none;
+	color: rgba(255, 255, 255, 0.8);
+	cursor: pointer;
+	font-size: 1rem;
+	padding: 0.5rem 1rem;
+	transition: all 0.2s;
+	border-radius: var(--border-radius);
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+.copy-output-btn:hover {
+	background: hsl(0deg 0% 100% / 10%);
+	color: #fff;
+}
+.output-box {
+    color: #fff;
+    font-size: 1rem;
+    line-height: 1.6;
+    padding: 1rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    height: 16rem;
+    overflow-y: auto;
+}
+.info-text {
+    color: #aaa;
+    font-size: 1rem;
+    margin-top: 0.8rem;
+    margin-bottom: 1rem;
+}
+.error-text {
+	color: var(--error);
+	font-size: 1rem;
+	min-height: 1rem;
+	margin-top: 0.5rem;
+}
+.modal-overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.5);
+	display: none;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+}
+.modal-overlay.active {
+	display: flex;
+}
+.modal-content {
+	background: var(--card-bg);
+	border-radius: var(--border-radius);
+	padding: 2rem;
+	max-width: 400px;
+	width: 90%;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+	border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.modal-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 1.5rem;
+}
+.modal-title {
+	font-size: 1.5rem;
+	font-weight: 600;
+	color: #fff;
+}
+.modal-close {
+	background: none;
+	border: none;
+	color: rgba(255, 255, 255, 0.6);
+	font-size: 1.5rem;
+	cursor: pointer;
+	padding: 0;
+	width: 2rem;
+	height: 2rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.modal-close:hover {
+	color: #fff;
+}
+.modal-body {
+	margin-bottom: 1.5rem;
+}
+.modal-label {
+	display: block;
+	color: rgba(255, 255, 255, 0.9);
+	font-size: 1rem;
+	margin-bottom: 0.5rem;
+	font-weight: 500;
+}
+.color-picker-row {
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+}
+.color-picker-visual {
+	width: 3rem;
+	height: 3rem;
+	border-radius: 50%;
+	cursor: pointer;
+	border: 2px solid rgba(255, 255, 255, 0.2);
+	flex-shrink: 0;
+}
+.color-input {
+	flex: 1;
+	padding: 0.75rem;
+	background: hsl(0deg 0% 100% / 10%);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	border-radius: var(--border-radius);
+	color: #fff;
+	
+	font-size: 1rem;
+	text-align: center;
+	outline: none;
+}
+.style-selector {
+	display: flex;
+	gap: 0.5rem;
+	margin-top: 0.75rem;
+	flex-wrap: wrap;
+}
+.style-btn {
+	padding: 0.75rem 1rem;
+	background: hsl(0deg 0% 100% / 10%);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	border-radius: var(--border-radius);
+	color: #fff;
+	cursor: pointer;
+	font-size: 1rem;
+	transition: all 0.2s;
+}
+.style-btn:hover {
+	background: hsl(0deg 0% 100% / 15%);
+}
+.style-btn.active {
+	background: hsl(120deg 70% 50%);
+	border-color: hsl(120deg 70% 60%);
+}
+.modal-preview {
+	background: hsl(0deg 0% 100% / 10%);
+	padding: 1rem;
+	border-radius: var(--border-radius);
+	
+	font-size: 1.2rem;
+	color: #fff;
+	margin-top: 1rem;
+}
+.modal-save {
+	width: 100%;
+	padding: 0.75rem;
+	background: hsl(0deg 0% 100% / 7%);
+	border: none;
+	border-radius: var(--border-radius);
+	color: #fff;
+	font-size: 1rem;
+	font-weight: 500;
+	cursor: pointer;
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+	transition: all 0.3s;
+}
+.modal-save:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+}
+.import-textarea {
+	width: 100%;
+	min-height: 10rem;
+	padding: 1rem;
+	background: hsl(0deg 0% 100% / 10%);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	border-radius: var(--border-radius);
+	color: #fff;
+
+	font-size: 1rem;
+	resize: vertical;
+	outline: none;
+	margin-bottom: 1rem;
+}
+.confirm-modal .modal-body {
+	text-align: center;
+}
+.confirm-modal .modal-body p {
+	color: rgba(255, 255, 255, 0.9);
+	margin-bottom: 1.5rem;
+	font-size: 1rem;
+}
+.confirm-buttons {
+	display: flex;
+	gap: 1rem;
+	justify-content: center;
+}
+.confirm-btn {
+	padding: 0.75rem 1.5rem;
+	border: none;
+	border-radius: var(--border-radius);
+	cursor: pointer;
+	font-size: 1rem;
+	font-weight: 500;
+	transition: all 0.3s;
+}
+.confirm-btn.cancel {
+	background: hsl(0deg 0% 50%);
+	color: #fff;
+}
+.confirm-btn.delete {
+	background: hsl(0deg 100% 50%);
+	color: #fff;
+}
+.confirm-btn:hover {
+	transform: translateY(-1px);
+	opacity: 0.9;
+}
+</style>
+<p>Here you can create custom code highlighting themes for BDFD.</p>
+<div id="admonition-note" class="admonition admonish-note" role="note" aria-labelledby="admonition-note-title">
+<div class="admonition-title">
+<div id="admonition-note-title">
+<p>Note</p>
+</div>
+<a class="admonition-anchor-link" href="tools/highlighter.html#admonition-note"></a>
+</div>
+<div>
+<p>The code highlighter allows you to assign custom colors and styles to BDFD functions, creating syntax highlighting themes that improve code readability. Generate JSON themes to use in the BDFD app’s highlighting settings.</p>
+</div>
+</div>
+<div class="picker-container">
+<h2 id="code-highlighter"><a class="header" href="#code-highlighter">Code Highlighter</a></h2>
+<p>Highlight different functions and text using unique colors for better coding experience.</p>
+<div class="control-bar">
+<button id="importThemeBtn" class="control-btn">Import Theme</button>
+<div class="function-selector-wrapper">
+<button id="addFunctionBtn" class="control-btn">Add Function</button>
+<div id="functionDropdown" class="function-dropdown">
+<input type="text" id="functionSearch" class="function-search" placeholder="Search function...">
+<div id="functionList" class="function-list"></div>
+</div>
+</div>
+<button id="deleteAllBtn" class="control-btn">Delete All</button>
+</div>
+<div id="functionsGrid" class="functions-grid"></div>
+<div class="btn-row">
+<button id="generateBtn" class="btn-secondary">Generate Code</button>
+</div>
+<div class="output-container">
+<div class="output-header">
+<span class="output-title">Highlighted Code</span>
+<button id="copyOutputBtn" class="copy-output-btn">📋 Copy</button>
+</div>
+<div id="output" class="output-box">Your highlighted code will appear here...</div>
+</div>
+<div class="info-text" id="infoText">0 functions</div>
+<div class="error-text" id="errorText"></div>
+</div>
+<div id="editModal" class="modal-overlay">
+<div class="modal-content">
+<div class="modal-header">
+<h3 id="edit-highlight" class="modal-title"><a class="header" href="#edit-highlight">Edit Highlight</a></h3>
+<button id="modalClose" class="modal-close">×</button>
+</div>
+<div class="modal-body">
+<label class="modal-label">Color</label>
+<div class="color-picker-row">
+<div id="colorPickerVisual" class="color-picker-visual"></div>
+<input type="text" id="hexInput" class="color-input" placeholder="#FFFFFF">
+</div>
+<p><label class="modal-label" style="margin-top: 1rem;">Style</label></p>
+<div class="style-selector">
+<button class="style-btn active" data-style="0">Normal</button>
+<button class="style-btn" data-style="2">Italic</button>
+<button class="style-btn" data-style="1">Bold</button>
+<button class="style-btn" data-style="3">Bold+Italic</button>
+</div>
+<div class="modal-preview" id="modalPreview">Sample Text</div>
+</div>
+<button id="modalSave" class="modal-save">Save</button>
+</div>
+</div>
+<div id="importModal" class="modal-overlay">
+<div class="modal-content">
+<div class="modal-header">
+<h3 id="import-json-theme" class="modal-title"><a class="header" href="#import-json-theme">Import JSON Theme</a></h3>
+<button id="importModalClose" class="modal-close">×</button>
+</div>
+<div class="modal-body">
+<textarea id="importTextarea" class="import-textarea" placeholder="Paste your JSON theme here"></textarea>
+<div class="error-text" id="importError"></div>
+</div>
+<div class="confirm-buttons">
+<button id="cancelImport" class="confirm-btn cancel">Cancel</button>
+<button id="applyImport" class="confirm-btn delete">Apply Theme</button>
+</div>
+</div>
+</div>
+<div id="deleteModal" class="modal-overlay confirm-modal">
+<div class="modal-content">
+<div class="modal-header">
+<h3 id="confirm-deletion" class="modal-title"><a class="header" href="#confirm-deletion">Confirm Deletion</a></h3>
+<button id="deleteModalClose" class="modal-close">×</button>
+</div>
+<div class="modal-body">
+<p>Are you sure you want to delete this function?</p>
+<div class="confirm-buttons">
+<button id="cancelDelete" class="confirm-btn cancel">Cancel</button>
+<button id="confirmDelete" class="confirm-btn delete">Delete</button>
+</div>
+</div>
+</div>
+</div>
+<div id="deleteAllModal" class="modal-overlay confirm-modal">
+<div class="modal-content">
+<div class="modal-header">
+<h3 id="confirm-deletion-1" class="modal-title"><a class="header" href="#confirm-deletion-1">Confirm Deletion</a></h3>
+<button id="deleteAllModalClose" class="modal-close">×</button>
+</div>
+<div class="modal-body">
+<p>Are you sure you want to delete the saved theme? This action cannot be undone.</p>
+<div class="confirm-buttons">
+<button id="cancelDeleteAll" class="confirm-btn cancel">Cancel</button>
+<button id="confirmDeleteAll" class="confirm-btn delete">Delete</button>
+</div>
+</div>
+</div>
+</div>
+<h2 id="functions-4"><a class="header" href="#functions-4">Functions</a></h2>
+<div id="admonition-note-1" class="admonition admonish-note" role="note" aria-labelledby="admonition-note-1-title">
+<div class="admonition-title">
+<div id="admonition-note-1-title">
+<p>Note</p>
+</div>
+<a class="admonition-anchor-link" href="tools/highlighter.html#admonition-note-1"></a>
+</div>
+<div>
+<p>Generated code uses standard BDFD highlighting JSON format.</p>
+</div>
+</div>
+<p><strong>Base Highlights:</strong></p>
+<ul>
+<li>Default Text - Main text color</li>
+<li>Fallback - Functions not in custom list</li>
+<li>Numbers - Numeric values</li>
+<li><code>[]</code> - Bracket characters</li>
+<li><code>;</code> - Semicolon characters</li>
+</ul>
+<p><strong>Custom Functions:</strong>
+Add any BDFD function to customize its color and style.</p>
+<h2 id="example-4"><a class="header" href="#example-4">Example</a></h2>
+<p><strong>Generated JSON:</strong></p>
+<pre><code class="language-json">{
+  "defaultTextHighlight": { "color": 4288341353, "style": 0 },
+  "fallbackHighlight": { "color": 4291546079, "style": 0 },
+  "bracketHighlight": { "color": 4294921292, "style": 1 },
+  "semicolonHighlight": { "color": 4294920266, "style": 1 },
+  "functionsHighlights": {
+    "$nomention": { "color": 4294932473, "style": 0 },
+    "$if": { "color": 4288905212, "style": 0 }
+  }
+}
+</code></pre>
+<div id="admonition-where-to-paste-this-json-body" class="admonition admonish-question" role="note" aria-labelledby="admonition-where-to-paste-this-json-body-title">
+<div class="admonition-title">
+<div id="admonition-where-to-paste-this-json-body-title">
+<p>Where to paste this JSON body?</p>
+</div>
+<a class="admonition-anchor-link" href="tools/highlighter.html#admonition-where-to-paste-this-json-body"></a>
+</div>
+<div>
+<p>Paste this JSON directly into the Highlighting Settings within the BDFD app. To do this, open the app, go to Settings → Change Code Highlight Settings, then click Apply Theme and paste the JSON.</p>
+</div>
+</div>
+<script src="highlighter.js"></script>
 
             </main>
 

@@ -8,7 +8,7 @@ class MDBookSidebarScrollbox extends HTMLElement {
         super();
     }
     connectedCallback() {
-        this.innerHTML = '<ol class="chapter"><li class="chapter-item affix "><a href="foreword.html">Home</a></li><li class="chapter-item affix "><li class="spacer"></li><li class="chapter-item "><a href="tools/color.html">Color</a></li><li class="chapter-item "><a href="tools/editor.html">Text Editor</a></li><li class="chapter-item "><a href="tools/json.html">JSON Editor</a></li><li class="chapter-item "><a href="tools/permissionscalculator.html">Permission Calculator</a></li><li class="chapter-item "><a href="tools/timestamp.html">Timestamp Converter</a></li></ol>';
+        this.innerHTML = '<ol class="chapter"><li class="chapter-item affix "><a href="foreword.html">Home</a></li><li class="chapter-item affix "><li class="spacer"></li><li class="chapter-item "><a href="tools/color.html">Color</a></li><li class="chapter-item "><a href="tools/editor.html">Text Editor</a></li><li class="chapter-item "><a href="tools/json.html">JSON Editor</a></li><li class="chapter-item "><a href="tools/permissionscalculator.html">Permission Calculator</a></li><li class="chapter-item "><a href="tools/timestamp.html">Timestamp Converter</a></li><li class="chapter-item "><a href="tools/escaper.html">Character Escaper</a></li><li class="chapter-item "><a href="tools/embed.html">Embed Builder</a></li><li class="chapter-item "><a href="tools/highlighter.html">Code Highlighter</a></li></ol>';
         // Set the current, active page, and reveal it if it's hidden
         let current_page = document.location.href.toString().split("#")[0].split("?")[0];
         if (current_page.endsWith("/")) {

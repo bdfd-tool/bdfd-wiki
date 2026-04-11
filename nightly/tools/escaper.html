@@ -4,7 +4,7 @@
 <head>
     <!-- Book generated using mdBook -->
     <meta charset="UTF-8">
-    <title>Timestamp Converter - BDFD - Community Tools</title>
+    <title>Character Escaper - BDFD - Community Tools</title>
 
 
 
@@ -186,16 +186,16 @@
                     <script src="../theme/breadcrumbs.js"></script>
                 </nav>
 
-                <a href="https://github.com/NilPointer-Software/bdfd-wiki/edit/dev/src/tools/timestamp.md" class="editPage">
+                <a href="https://github.com/NilPointer-Software/bdfd-wiki/edit/dev/src/tools/escaper.md" class="editPage">
                     <i class='fa fa-edit' id="editPageIcon"></i>
                 </a>
 
-                <h1 id="timestamp-converter"><a class="header" href="#timestamp-converter">Timestamp Converter</a></h1>
+                <h1 id="escaper"><a class="header" href="#escaper">Escaper</a></h1>
 <style>
 .editPage {
 	visibility: hidden;
 }
-.converter-section {
+.picker-container {
     background: var(--card-bg);
 	border-radius: var(--border-radius);
 	border: 1px solid rgba(255, 255, 255, 0.05);
@@ -205,77 +205,52 @@
 	padding-right: 1.5rem;
 	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
 }
-.converter-section h2 {
+.picker-container h2 {
     margin-top: -.5rem;
     padding-top: 1.5rem;
 }
-.converter-section p {
-    margin-top: -1.5rem;
+.picker-container p {
+	margin-top: -1.5rem;
 }
-.converter-section label {
+.textarea-row {
 	display: block;
-	margin-bottom: .5rem !important;
-	color: var(--error);
+	margin: 1rem 0;
 }
-.converter-section input {
+.escaper-input, .escaper-output {
     color: #fff;
-    padding: 2.25rem;
-    width: 100%;
-	max-width: 100%;
-	box-sizing: border-box;
-    background: hsl(0deg 0% 100% / 7%);
-    border-radius: var(--border-radius);
-    border-width: 0;
-    font-family: monospace;
-    font-size: 14px;
-    height: 3rem;
-    margin-bottom: 1rem;
-    outline: none;
-	touch-action: manipulation;
-	-webkit-user-select: none;
-	user-select: none;
-}
-#datetimepicker {
-    margin-bottom: 1rem !important;
-}
-.result {
-    margin-top: 1rem;
-	margin-bottom: 1.5rem;
     padding: 1rem;
-	padding-top: 2rem;
-	padding-bottom: 2rem;
     background: hsl(0deg 0% 100% / 7%);
     border-radius: var(--border-radius);
-    font-weight: bold;
+	border-width: 0;
+    font-family: monospace;
+    font-size: 1.5rem ;
+    line-height: 1.5;
+    height: 16rem;
+    width: 100%;
+    outline: none;
+	resize: vertical;
+	transition: all 0.3s;
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+	margin-bottom: 1rem;
+}
+.escaper-input:focus {
+	box-shadow: 0 0 0 3px rgba(255,255,255,0.3), 0 8px 15px rgba(0, 0, 0, 0.4);
+}
+.escaper-output {
+    background: hsl(0deg 0% 100% / 7%);
+    min-height: 16rem;
+    white-space: pre-wrap;
     word-break: break-all;
-    display: flex;
-    height: 3.5rem !important;
-    align-items: center;
+    color: #fff;
 }
-.result p {
-	margin-top: 1.5rem !important;
-	padding: .5rem;
-	border-radius: var(--border-radius);
-	word-break: break-all;
+.btn-row {
 	display: flex;
-	height: 3.5rem !important;
-	align-items: center;
-	user-select: none;
-	-webkit-user-select: none;
-}
-.timestamp {
-    color: #7f8c8d;
-}
-.time-buttons {
-    user-select: none;
-	-webkit-user-select: none;
-	display: flex;
-	justify-content: center;
+	gap: 1rem;
+	margin: 1rem 0;
 	flex-wrap: wrap;
-    margin-bottom: 2rem;
-    margin-top: -1rem;
+	justify-content: center;
 }
-.converter-section button {
+.escape-btn, .copy-btn, .clear-btn {
 	outline: none;
 	touch-action: manipulation;
 	-webkit-user-select: none;
@@ -286,38 +261,57 @@
 	border: none;
 	border-radius: var(--border-radius);
 	cursor: pointer;
-	margin-top: 1rem !important;
-    margin-right: 1rem !important;
-	font-size: 1.5rem;
-	margin: 0.25%;
+	font-size: 1.5rem ;
 	color: #fff;
 	background: hsl(0deg 0% 100% / 7%);
 	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+	transition: all 0.3s;
+	font-weight: 500;
 }
-.current-time {
-    text-align: center;
-    padding: 1.5rem;
-    background-color: var(--card-bg);
-    border-radius: var(--border-radius);
-    margin-top: 3rem;
+.escape-btn {
+	background: hsl(0deg 0% 100% / 7%);
+	font-weight: 500;
+	padding-left: 1.5rem;
+	padding-right: 1.5rem;
+	font-size: 1.5rem ;
+	height: 4rem ;
 }
-#current-time span {
-	color: #a5a5a5;
+.escape-btn:hover, .copy-btn:hover, .clear-btn:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
 }
-.timezone-error, #date-info {
-    color: var(--error) !important;
-    font-size: 1rem;
-    min-height: 1rem;
-	margin-top: -0.75rem;
-	margin-bottom: -0.75rem !important;
+.error {
+	color: var(--error);
+	font-size: 1.2rem;
+	min-height: 1rem;
+	padding: 0;
+	margin: 0;
 }
-#date-info {
-	margin-top: -2rem !important;
-	margin-left: -1rem;
-	padding: 1rem;
+.char-count {
+    color: #aaa;
+    font-size: 1.2rem;
+    margin-top: 0.5rem;
+}
+
+.highlight-span {
+	background: hsl(0deg 0% 100% / 10%);
+	color: #fff;
+	padding: 0.5rem 0.75rem;
+	border-radius: 6px;
+	font-family: monospace;
+	font-weight: bold;
+	font-size: 1.3rem;
+}
+.output-span {
+	background: hsl(0deg 0% 100% / 10%);
+	padding: 0.5rem 0.75rem;
+	border-radius: 6px;
+	font-family: monospace;
+	font-size: 1.3rem;
+	color: #fff;
 }
 </style>
-<p>Here you can manage UnixTime for your commands.</p>
+<p>Here you can escape special characters to use in ur code.</p>
 <div id="admonition-note" class="admonition admonish-note" role="note" aria-labelledby="admonition-note-title">
 <div class="admonition-title">
 <div id="admonition-note-title">
@@ -326,92 +320,137 @@
 <a class="admonition-anchor-link" href="#admonition-note"></a>
 </div>
 <div>
-<p>Unix time is a system for tracking time by counting the number of seconds that have passed since January 1st, 1970. This value is stored as a simple integer, which computers can easily process and calculate with. For example, the function <a href="https://wiki.botdesignerdiscord.com/nightl/bdscript/getTimestamp.md"><code>$getTimestamp</code></a> can be used to get the current Unix timestamp or perform time-based operations for your bot.</p>
+<p>Escape characters are used to treat special symbols as plain text instead of triggering functions. This lets your bot return characters like <span class="highlight-span">;</span>, <span class="highlight-span">$</span>, <span class="highlight-span">]</span>, <span class="highlight-span">\</span> inside your message without breaking the script.</p>
 </div>
 </div>
-<div id="admonition-info" class="admonition admonish-info" role="note" aria-labelledby="admonition-info-title">
+<div class="picker-container">
+	<h2 id="character-escaper"><a class="header" href="#character-escaper">Character Escaper</a></h2>
+  	<p>Paste text to escape. Click Escape Code to process.</p>
+  	<div class="textarea-row">
+    	<textarea id="inputText" class="escaper-input" placeholder="Original text..."></textarea>
+    	<textarea id="outputText" class="escaper-output" readonly placeholder="Escaped text..."></textarea>
+  	</div>
+  	<div class="btn-row">
+    	<button id="escapeBtn" class="escape-btn">Escape Code</button>
+    	<button id="copyBtn" class="copy-btn">Copy Output</button>
+    	<button id="clearBtn" class="clear-btn">Clear</button>
+  	</div>
+  	<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-bottom: 1.5rem;">
+    	<div class="char-count" id="charCount">0 / 0 characters</div>
+    	<div class="error" id="errorText" style="margin: 0; flex-shrink: 0;"></div>
+  	</div>
+</div>
+<h2 id="escaping-rules"><a class="header" href="#escaping-rules">Escaping Rules</a></h2>
+<div id="admonition-note-1" class="admonition admonish-note" role="note" aria-labelledby="admonition-note-1-title">
 <div class="admonition-title">
-<div id="admonition-info-title">
-<p>Info</p>
+<div id="admonition-note-1-title">
+<p>Note</p>
 </div>
-<a class="admonition-anchor-link" href="#admonition-info"></a>
+<a class="admonition-anchor-link" href="#admonition-note-1"></a>
 </div>
 <div>
-<p>The timezone selected on your device is used as default.</p>
+<p>These characters are changed:</p>
+<p><span class="highlight-span">$</span> → <span class="output-span">%{DOL}%</span></p>
+<p><span class="highlight-span">]</span> → <span class="output-span">\]</span></p>
+<p><span class="highlight-span">;</span> → <span class="output-span">\;</span></p>
+<p><span class="highlight-span">\</span> → <span class="output-span">\\</span></p>
 </div>
-</div>
-<div class="converter-section">
-    <h2 id="time-zone"><a class="header" href="#time-zone">Time zone</a></h2>
-    <p>Select timezone for time calculations</p>
-    <input type="timestamp" id="timezone" placeholder="e.g., Europe/London" oninput="updateTimezone()" onkeypress="if(event.key === 'Enter') updateTimezone()">
-    <label class="timezone-error"></label>
-</div>
-<div class="converter-section">
-    <h2 id="date-to-unix-timestamp"><a class="header" href="#date-to-unix-timestamp">Date to Unix Timestamp</a></h2>
-    <p>Select a date and time:</p>
-    <input type="datetime-local" id="datetimepicker" oninput="updateUnixTime()">
-    <div class="result">
-		<p>Unix timestamp:</p>
-        <span id="unixtime-display">0</span>
-        <div class="timestamp" id="timestamp-info"></div>
-    </div>
-</div>
-<div class="converter-section">
-    <h2 id="unix-timestamp-to-date"><a class="header" href="#unix-timestamp-to-date">Unix Timestamp to Date</a></h2>
-    <p>Enter Unix timestamp:</p>
-    <input type="number" id="unix-input" placeholder="e.g., 1704067200" oninput="updateDateFromUnix()" onkeypress="if(event.key === 'Enter') updateDateFromUnix()" min="0">
-    <div class="result">
-		<p>Date and time:</p>
-        <span id="date-display">Not set</span>
-    </div>
-	<div class="timestamp" id="date-info"></div>
-</div>
-<div class="converter-section">
-    <h2 id="time-remaining"><a class="header" href="#time-remaining">Time Remaining</a></h2>
-    <p>Time until selected Unix timestamp:</p>
-    <div class="result">
-        <span id="timer-display">Loading...</span>
-    </div>
-</div>
-<div class="current-time">
-    <span id="current-time"></span>
 </div>
 <h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
-<p>Here are all the functions related to unix timestamp.</p>
-<p><strong>GET</strong>:</p>
-<ul>
-<li><a href="https://wiki.botdesignerdiscord.com/nightl/bdscript/getEmbedData.md"><code>$getEmbedData[]</code></a></li>
-<li><a href="https://wiki.botdesignerdiscord.com/nightl/bdscript/getTimestamp.md"><code>$getTimestamp</code></a></li>
-<li><a href="https://wiki.botdesignerdiscord.com/nightl/bdscript/getTimestampComplex.md"><code>$getTimestamp[]</code></a></li>
-<li><a href="https://wiki.botdesignerdiscord.com/nightl/bdscript/hostingExpireTime.md"><code>$hostingExpireTime</code></a></li>
-<li><a href="https://wiki.botdesignerdiscord.com/nightl/bdscript/hostingExpireTimeComplex.md"><code>$hostingExpireTime[]</code></a></li>
-<li><a href="https://wiki.botdesignerdiscord.com/nightl/bdscript/lastPinTimestamp.md"><code>$lastPinTimestamp</code></a></li>
-<li><a href="https://wiki.botdesignerdiscord.com/nightl/bdscript/messageEditedTimestamp.md"><code>$messageEditedTimestamp[]</code></a></li>
-<li><a href="https://wiki.botdesignerdiscord.com/nightl/bdscript/premiumExpireTime.md"><code>$premiumExpireTime</code></a></li>
-</ul>
-<h2 id="example"><a class="header" href="#example">Example</a></h2>
-<pre><code>$nomention
-Unix date: &lt;t:1917043200:D&gt;
-</code></pre>
-<discord-messages>
-    <discord-message author="RainbowKey" role-color="#E67E22">
-        !example
-    </discord-message>
-    <discord-message author="BDFD Support" verified bot role-color="#378afa">
-        Unix date: <div class="discord-time-mark">January 10, 2030</div>
-    </discord-message>
-</discord-messages>
-<div id="admonition-example" class="admonition admonish-example" role="note" aria-labelledby="admonition-example-title">
+<div id="admonition-note-2" class="admonition admonish-note" role="note" aria-labelledby="admonition-note-2-title">
 <div class="admonition-title">
-<div id="admonition-example-title">
-<p>Example</p>
+<div id="admonition-note-2-title">
+<p>Note</p>
 </div>
-<a class="admonition-anchor-link" href="#admonition-example"></a>
+<a class="admonition-anchor-link" href="#admonition-note-2"></a>
 </div>
 <div>
-<p>You can use <a href="https://wiki.botdesignerdiscord.com/nightl/resources/discordTimestamps.md">Discord timestamp highlighting</a> to make your code look nicer!</p>
+<p>Use in BDFD functions like <a href="https://wiki.botdesignerdiscord.com/nightly/bdscript/sendMessage.md"><code>$sendMessage[]</code></a>, <a href="https://wiki.botdesignerdiscord.com/nightly/guides/general/bds2/asyncScopes.md"><code>$async[]</code></a>, embeds, etc.</p>
 </div>
 </div>
+<h2 id="example"><a class="header" href="#example">Example</a></h2>
+<pre><code>$nomention
+$sendMessage[[%{DOL}%Hello\\; this is pretty cool\\; right%{DOL}%\\]]
+</code></pre>
+<discord-messages>
+    <discord-message role-color="#ffffff" author="Zubariel">
+        !example
+    </discord-message>
+    <discord-message role-color="#378afa" bot verified author="BDFD Support">
+        [$Hello; this is pretty cool; right$]
+    </discord-message>
+</discord-messages>
+<div id="admonition-how-to-use" class="admonition admonish-question" role="note" aria-labelledby="admonition-how-to-use-title">
+<div class="admonition-title">
+<div id="admonition-how-to-use-title">
+<p>How to use?</p>
+</div>
+<a class="admonition-anchor-link" href="#admonition-how-to-use"></a>
+</div>
+<div>
+<p>Paste text → Escape Code → Copy Output → Paste in BDFD.</p>
+</div>
+</div>
+<script>
+function escapeBDFD(text) {
+  return text
+    .replace(/\\/g, '\\\\')
+    .replace(/\$/g, '%{DOL}%')
+    .replace(/\]/g, '\\]')
+    .replace(/;/g, '\\;');
+}
+<p>document.addEventListener(‘DOMContentLoaded’, function() {
+const input = document.getElementById(‘inputText’);
+const output = document.getElementById(‘outputText’);
+const escapeBtn = document.getElementById(‘escapeBtn’);
+const copyBtn = document.getElementById(‘copyBtn’);
+const clearBtn = document.getElementById(‘clearBtn’);
+const charCount = document.getElementById(‘charCount’);
+const errorText = document.getElementById(‘errorText’);</p>
+<p>function updateCharCount() {
+const inLen = input.value.length;
+const outLen = output.value.length;
+charCount.textContent = <code>${inLen} / ${outLen} characters</code>;
+}</p>
+<p>escapeBtn.onclick = function() {
+errorText.textContent = ‘’;
+const text = input.value;
+if (!text.trim()) {
+errorText.textContent = ‘Enter text to escape’;
+return;
+}
+output.value = escapeBDFD(text);
+updateCharCount();
+escapeBtn.style.transform = ‘scale(0.95)’;
+setTimeout(() =&gt; { escapeBtn.style.transform = ‘’; }, 150);
+};</p>
+<p>copyBtn.onclick = function() {
+const text = output.value;
+if (!text.trim()) {
+errorText.textContent = ‘Nothing to copy’;
+return;
+}
+navigator.clipboard.writeText(text).then(() =&gt; {
+const original = copyBtn.textContent;
+copyBtn.textContent = ‘Copied!’;
+copyBtn.style.background = ‘hsl(120deg 100% 30%)’;
+setTimeout(() =&gt; {
+copyBtn.textContent = original;
+copyBtn.style.background = ‘’;
+}, 2000);
+}).catch(() =&gt; {
+errorText.textContent = ‘Copy failed’;
+});
+};</p>
+<p>clearBtn.onclick = function() {
+input.value = ‘’;
+output.value = ‘’;
+updateCharCount();
+errorText.textContent = ‘’;
+};</p>
+<p>input.oninput = updateCharCount;
+});
+</script></p>
 
             </main>
 
