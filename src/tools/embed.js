@@ -1,6 +1,7 @@
 const MODE_KEY = "bdtools_embed_mode";
 const NORMAL_KEY = "bdtools_normal_embed_state";
 const SEND_KEY = "bdtools_send_embed_state";
+const CV2_KEY = "bdtools_compv2_state";
 
 let currentMode = localStorage.getItem(MODE_KEY) || "normal";
 let fieldCount = 0,
@@ -189,37 +190,53 @@ function switchMode(mode) {
   if (mode === currentMode) return;
   // save current mode state before switching
   if (currentMode === "normal") saveNormalState();
-  else saveSendState();
+  else if (currentMode === "send") saveSendState();
+  else if (currentMode === "compv2") saveCV2State();
 
   currentMode = mode;
   localStorage.setItem(MODE_KEY, mode);
 
   const normalBuilder = document.getElementById("normalBuilder");
   const sendBuilder = document.getElementById("sendBuilder");
+  const compV2Builder = document.getElementById("compV2Builder");
   const btnNormal = document.getElementById("modeNormal");
   const btnSend = document.getElementById("modeSend");
+  const btnCV2 = document.getElementById("modeCompV2");
+
+  normalBuilder.style.display = "none";
+  sendBuilder.style.display = "none";
+  compV2Builder.style.display = "none";
+  btnNormal.classList.remove("active");
+  btnSend.classList.remove("active");
+  btnCV2.classList.remove("active");
 
   if (mode === "normal") {
     normalBuilder.style.display = "";
-    sendBuilder.style.display = "none";
     btnNormal.classList.add("active");
-    btnSend.classList.remove("active");
     loadNormalState();
-  } else {
-    normalBuilder.style.display = "none";
+  } else if (mode === "send") {
     sendBuilder.style.display = "";
-    btnNormal.classList.remove("active");
     btnSend.classList.add("active");
     loadSendState();
+  } else if (mode === "compv2") {
+    compV2Builder.style.display = "";
+    btnCV2.classList.add("active");
+    // DO NOT call loadCV2State() here — cards are already in the DOM
+    // Just refresh dropdowns in case names changed while in another mode
+    cv2RefreshAllDropdowns();
   }
 }
 
-function makeHeader(title, body) {
+function makeHeader(title, body, onRemove) {
   const header = document.createElement("div");
   header.className = "component-header";
   const titleEl = document.createElement("span");
   titleEl.className = "component-title";
   titleEl.textContent = title;
+
+  const btnGroup = document.createElement("div");
+  btnGroup.style.cssText = "display:flex;gap:0.5rem;align-items:center;";
+
   const collapseBtn = document.createElement("button");
   collapseBtn.className = "collapse-btn";
   collapseBtn.textContent = "▲";
@@ -228,8 +245,18 @@ function makeHeader(title, body) {
     body.style.display = collapsed ? "" : "none";
     collapseBtn.textContent = collapsed ? "▲" : "▼";
   };
+  btnGroup.appendChild(collapseBtn);
+
+  if (onRemove) {
+    const removeBtn = document.createElement("button");
+    removeBtn.className = "remove-btn-red remove-btn-small";
+    removeBtn.textContent = "✕";
+    removeBtn.onclick = onRemove;
+    btnGroup.appendChild(removeBtn);
+  }
+
   header.appendChild(titleEl);
-  header.appendChild(collapseBtn);
+  header.appendChild(btnGroup);
   return header;
 }
 
@@ -244,18 +271,16 @@ function addFieldRow() {
       <input class="form-input field-name" placeholder="Field Name">
       <input class="form-input field-value" placeholder="Field Value">
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.75rem;">
+    <div style="display:flex;align-items:center;margin-top:0.75rem;">
       <label class="checkbox-label" style="margin:0;">
         <input type="checkbox" class="form-checkbox field-inline">
         <span>Inline</span>
       </label>
-      <button class="remove-btn-red remove-btn-small">Remove</button>
     </div>
   `;
-  row.appendChild(makeHeader(`Field #${fieldCount}`, body));
+  row.appendChild(makeHeader(`Field #${fieldCount}`, body, () => row.remove()));
   row.appendChild(body);
   document.getElementById("dynamicFields").appendChild(row);
-  body.querySelector(".remove-btn-red").onclick = () => row.remove();
 }
 
 function addButtonRow() {
@@ -280,24 +305,22 @@ function addButtonRow() {
       <input class="form-input button-emoji" placeholder="Emoji">
       <input class="form-input button-url" placeholder="URL (for Link style)">
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.75rem;">
-      <div style="display:flex;gap:1.5rem;align-items:center;">
-        <label class="checkbox-label" style="margin:0;">
-          <input type="checkbox" class="form-checkbox button-disabled">
-          <span>Disabled</span>
-        </label>
-        <label class="checkbox-label" style="margin:0;">
-          <input type="checkbox" class="form-checkbox button-newrow">
-          <span>New Row</span>
-        </label>
-      </div>
-      <button class="remove-btn-red remove-btn-small">Remove</button>
+    <div style="display:flex;gap:1.5rem;align-items:center;margin-top:0.75rem;">
+      <label class="checkbox-label" style="margin:0;">
+        <input type="checkbox" class="form-checkbox button-disabled">
+        <span>Disabled</span>
+      </label>
+      <label class="checkbox-label" style="margin:0;">
+        <input type="checkbox" class="form-checkbox button-newrow">
+        <span>New Row</span>
+      </label>
     </div>
   `;
-  row.appendChild(makeHeader(`Button #${buttonCount}`, body));
+  row.appendChild(
+    makeHeader(`Button #${buttonCount}`, body, () => row.remove()),
+  );
   row.appendChild(body);
   document.getElementById("dynamicFields").appendChild(row);
-  body.querySelector(".remove-btn-red").onclick = () => row.remove();
 }
 
 function addSelectRow() {
@@ -316,10 +339,11 @@ function addSelectRow() {
     <div class="options-container" style="margin-top:1rem;"></div>
     <div style="display:flex;gap:0.75rem;margin-top:0.75rem;">
       <button class="add-field-btn add-option-btn">+ Option</button>
-      <button class="add-field-btn remove-btn-red">Remove Menu</button>
     </div>
   `;
-  row.appendChild(makeHeader(`Select Menu #${selectCount}`, body));
+  row.appendChild(
+    makeHeader(`Select Menu #${selectCount}`, body, () => row.remove()),
+  );
   row.appendChild(body);
   document.getElementById("dynamicFields").appendChild(row);
 
@@ -365,8 +389,6 @@ function addSelectRow() {
     option.appendChild(optBody);
     optionsContainer.appendChild(option);
   };
-  const removeMenuBtns = body.querySelectorAll(".remove-btn-red");
-  removeMenuBtns[removeMenuBtns.length - 1].onclick = () => row.remove();
 }
 
 function addModalRow() {
@@ -383,10 +405,9 @@ function addModalRow() {
     <div class="modal-inputs-container" style="margin-top:1rem;"></div>
     <div style="display:flex;gap:0.75rem;margin-top:0.75rem;">
       <button class="add-field-btn add-modal-input-btn">+ Text Input</button>
-      <button class="add-field-btn remove-btn-red">Remove Modal</button>
     </div>
   `;
-  row.appendChild(makeHeader(`Modal #${modalCount}`, body));
+  row.appendChild(makeHeader(`Modal #${modalCount}`, body, () => row.remove()));
   row.appendChild(body);
   document.getElementById("dynamicFields").appendChild(row);
 
@@ -444,8 +465,6 @@ function addModalRow() {
     input.appendChild(inpBody);
     inputsContainer.appendChild(input);
   };
-  const btns = body.querySelectorAll(".remove-btn-red");
-  btns[btns.length - 1].onclick = () => row.remove();
 }
 
 function generateNormalEmbed() {
@@ -969,31 +988,48 @@ document.addEventListener("DOMContentLoaded", () => {
   // Apply saved mode on load
   const normalBuilder = document.getElementById("normalBuilder");
   const sendBuilder = document.getElementById("sendBuilder");
+  const compV2Builder = document.getElementById("compV2Builder");
   const btnNormal = document.getElementById("modeNormal");
   const btnSend = document.getElementById("modeSend");
+  const btnCV2 = document.getElementById("modeCompV2");
+
+  // Hide all, show active
+  normalBuilder.style.display = "none";
+  sendBuilder.style.display = "none";
+  compV2Builder.style.display = "none";
+  btnNormal.classList.remove("active");
+  btnSend.classList.remove("active");
+  btnCV2.classList.remove("active");
+
+  // Always load CV2 state once on startup — cards live in the DOM even when hidden
+  loadCV2State();
 
   if (currentMode === "send") {
-    normalBuilder.style.display = "none";
     sendBuilder.style.display = "";
-    btnNormal.classList.remove("active");
     btnSend.classList.add("active");
     loadSendState();
+  } else if (currentMode === "compv2") {
+    compV2Builder.style.display = "";
+    btnCV2.classList.add("active");
+    // loadCV2State() already called above
   } else {
+    normalBuilder.style.display = "";
+    btnNormal.classList.add("active");
     loadNormalState();
   }
 
   // Toggle buttons
   btnNormal.addEventListener("click", () => switchMode("normal"));
   btnSend.addEventListener("click", () => switchMode("send"));
+  btnCV2.addEventListener("click", () => switchMode("compv2"));
 
+  // ── Normal mode wiring ──────────────────────────────────────────────────────
   document
     .getElementById("generateBtn")
     .addEventListener("click", generateNormalEmbed);
-
   document.getElementById("copyBtn").addEventListener("click", function () {
     copyOutput("output", this);
   });
-
   document.getElementById("clearBtn").addEventListener("click", () => {
     clearInlineErrors();
     document.getElementById("error").textContent = "";
@@ -1017,13 +1053,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("charCount").textContent = "0 characters";
     localStorage.removeItem(NORMAL_KEY);
   });
-
   document.getElementById("addField").addEventListener("click", addFieldRow);
   document.getElementById("addButton").addEventListener("click", addButtonRow);
   document.getElementById("addSelect").addEventListener("click", addSelectRow);
   document.getElementById("addModal").addEventListener("click", addModalRow);
-
-  // Auto-save normal mode on input
   document
     .getElementById("normalBuilder")
     .addEventListener("input", saveNormalState);
@@ -1031,14 +1064,13 @@ document.addEventListener("DOMContentLoaded", () => {
     .getElementById("normalBuilder")
     .addEventListener("change", saveNormalState);
 
+  // ── Send mode wiring ────────────────────────────────────────────────────────
   document
     .getElementById("s_generateBtn")
     .addEventListener("click", generateSendEmbed);
-
   document.getElementById("s_copyBtn").addEventListener("click", function () {
     copyOutput("s_output", this);
   });
-
   document.getElementById("s_clearBtn").addEventListener("click", () => {
     clearInlineErrors();
     document.getElementById("s_error").textContent = "";
@@ -1055,12 +1087,802 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("s_charCount").textContent = "0 characters";
     localStorage.removeItem(SEND_KEY);
   });
-
-  // Auto-save send mode on input
   document
     .getElementById("sendBuilder")
     .addEventListener("input", saveSendState);
   document
     .getElementById("sendBuilder")
     .addEventListener("change", saveSendState);
+
+  // ── CompV2 mode wiring ──────────────────────────────────────────────────────
+  document
+    .getElementById("cv2AddContainer")
+    .addEventListener("click", () => cv2AddCard("container"));
+  document
+    .getElementById("cv2AddTextDisplay")
+    .addEventListener("click", () => cv2AddCard("textdisplay"));
+  document
+    .getElementById("cv2AddSeparator")
+    .addEventListener("click", () => cv2AddCard("separator"));
+  document
+    .getElementById("cv2AddSection")
+    .addEventListener("click", () => cv2AddCard("section"));
+  document
+    .getElementById("cv2AddThumbnail")
+    .addEventListener("click", () => cv2AddCard("thumbnail"));
+  document
+    .getElementById("cv2AddMediaGallery")
+    .addEventListener("click", () => cv2AddCard("mediagallery"));
+  document
+    .getElementById("cv2AddMediaItem")
+    .addEventListener("click", () => cv2AddCard("mediaitem"));
+  document
+    .getElementById("cv2AddActionRow")
+    .addEventListener("click", () => cv2AddCard("actionrow"));
+  document
+    .getElementById("cv2AddButtonCV2")
+    .addEventListener("click", () => cv2AddCard("buttoncv2"));
+  document
+    .getElementById("cv2AddUserSelect")
+    .addEventListener("click", () => cv2AddCard("userselect"));
+  document
+    .getElementById("cv2AddRoleSelect")
+    .addEventListener("click", () => cv2AddCard("roleselect"));
+  document
+    .getElementById("cv2AddMentionable")
+    .addEventListener("click", () => cv2AddCard("mentionable"));
+  document
+    .getElementById("cv2GenerateBtn")
+    .addEventListener("click", generateCV2);
+  document.getElementById("cv2CopyBtn").addEventListener("click", function () {
+    copyOutput("cv2Output", this);
+  });
+  document.getElementById("cv2ClearBtn").addEventListener("click", () => {
+    document.getElementById("cv2Components").innerHTML = "";
+    // Reset per-type counters
+    Object.keys(cv2Counters).forEach((k) => {
+      cv2Counters[k] = 0;
+    });
+    document.getElementById("cv2Output").textContent =
+      "Generated code appears here...";
+    document.getElementById("cv2CharCount").textContent = "0 characters";
+    document.getElementById("cv2Error").textContent = "";
+    localStorage.removeItem(CV2_KEY);
+  });
 });
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// COMPV2 BUILDER
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ─── CV2 state persistence ────────────────────────────────────────────────────
+
+// Track per-type counters for numbering (persists across mode switches)
+const cv2Counters = {};
+
+function saveCV2State() {
+  const cards = [];
+  document.querySelectorAll("#cv2Components [data-type]").forEach((card) => {
+    const type = card.dataset.type;
+    const fields = {};
+    card.querySelectorAll("[data-cv2field]").forEach((el) => {
+      fields[el.dataset.cv2field] =
+        el.type === "checkbox" ? el.checked : el.value;
+    });
+    cards.push({ type, fields });
+  });
+  localStorage.setItem(CV2_KEY, JSON.stringify({ components: cards }));
+}
+
+// Only called once on initial page load — never on mode switch
+function loadCV2State() {
+  const raw = localStorage.getItem(CV2_KEY);
+  if (!raw) return;
+  try {
+    const state = JSON.parse(raw);
+    if (!state.components) return;
+    // Restore each card and populate its fields BEFORE refreshing dropdowns
+    state.components.forEach((comp) => {
+      const card = cv2AddCard(comp.type, false); // doRefresh=false, no dropdown refresh yet
+      if (!card) return;
+      Object.entries(comp.fields).forEach(([key, val]) => {
+        const el = card.querySelector(`[data-cv2field="${key}"]`);
+        if (!el) return;
+        if (el.type === "checkbox") el.checked = val;
+        else el.value = val;
+      });
+    });
+    // Now that all name/id fields are populated, refresh dropdowns once
+    cv2RefreshAllDropdowns();
+  } catch (e) {}
+}
+
+// ─── CV2 dropdown helpers ─────────────────────────────────────────────────────
+
+// Collect names of a given component type from existing cards
+function cv2GetNames(type) {
+  const names = [];
+  document
+    .querySelectorAll(`#cv2Components [data-type="${type}"]`)
+    .forEach((card) => {
+      const nameEl =
+        card.querySelector("[data-cv2field='name']") ||
+        card.querySelector("[data-cv2field='id']");
+      const val = nameEl ? nameEl.value.trim() : "";
+      if (val) names.push(val);
+    });
+  return names;
+}
+
+// Build <optgroup> HTML
+function cv2Optgroup(label, names, required) {
+  if (names.length === 0) return "";
+  const opts = names
+    .map((n) => `<option value="${n.replace(/"/g, "&quot;")}">${n}</option>`)
+    .join("");
+  return `<optgroup label="${label}">${opts}</optgroup>`;
+}
+
+// Populate a <select> element with current names, preserving current value
+function cv2PopulateSelect(sel, groups, required) {
+  if (!sel) return;
+  const prev = sel.value;
+
+  // Determine what this select is for based on the field name
+  const fieldName = sel.dataset.cv2field || "";
+  let placeholder = "";
+
+  if (fieldName === "actionRowId") {
+    placeholder = required ? "Select the action row" : "Select the action row";
+  } else if (fieldName === "container") {
+    placeholder = required ? "Select the container" : "Select the container";
+  } else if (fieldName === "sectionName") {
+    placeholder = required ? "Select the section" : "Select the section";
+  } else if (fieldName === "galleryId") {
+    placeholder = required ? "Select the gallery" : "Select the gallery";
+  } else if (fieldName === "actionRowOrSection") {
+    placeholder = required
+      ? "Select action row or section"
+      : "Select action row or section";
+  } else if (fieldName === "containerOrSection") {
+    placeholder = required
+      ? "Select container or section"
+      : "Select container or section";
+  } else {
+    // Fallback to generic placeholders
+    placeholder = required ? "Select an option" : "None";
+  }
+
+  sel.innerHTML = `<option value="">${placeholder}</option>`;
+  groups.forEach(([label, names]) => {
+    sel.innerHTML += cv2Optgroup(label, names, required);
+  });
+  // restore previous selection if still valid
+  if (prev) {
+    const opt = sel.querySelector(`option[value="${CSS.escape(prev)}"]`);
+    if (opt) sel.value = prev;
+  }
+}
+
+// Refresh ALL dropdowns in all CV2 cards
+function cv2RefreshAllDropdowns() {
+  const containers = cv2GetNames("container");
+  const sections = cv2GetNames("section");
+  const galleries = cv2GetNames("mediagallery");
+  const actionRows = cv2GetNames("actionrow");
+
+  document.querySelectorAll("#cv2Components [data-type]").forEach((card) => {
+    const type = card.dataset.type;
+
+    // Container/Section dropdown (Text Display)
+    if (type === "textdisplay") {
+      cv2PopulateSelect(
+        card.querySelector("[data-cv2field='containerOrSection']"),
+        [
+          ["Containers", containers],
+          ["Sections", sections],
+        ],
+        false,
+      );
+    }
+    // Container dropdown (Separator, Media Gallery, Action Row, Section)
+    if (["separator", "mediagallery", "actionrow", "section"].includes(type)) {
+      cv2PopulateSelect(
+        card.querySelector("[data-cv2field='container']"),
+        [["Containers", containers]],
+        false,
+      );
+    }
+    // Section dropdown (Thumbnail)
+    if (type === "thumbnail") {
+      cv2PopulateSelect(
+        card.querySelector("[data-cv2field='sectionName']"),
+        [["Sections", sections]],
+        true,
+      );
+    }
+    // Gallery dropdown (Media Item)
+    if (type === "mediaitem") {
+      cv2PopulateSelect(
+        card.querySelector("[data-cv2field='galleryId']"),
+        [["Galleries", galleries]],
+        true,
+      );
+    }
+    // Action Row / Section dropdown (Button CV2)
+    if (type === "buttoncv2") {
+      cv2PopulateSelect(
+        card.querySelector("[data-cv2field='actionRowOrSection']"),
+        [
+          ["Action Rows", actionRows],
+          ["Sections", sections],
+        ],
+        true,
+      );
+    }
+    // Action Row dropdown (Selects)
+    if (["userselect", "roleselect", "mentionable"].includes(type)) {
+      cv2PopulateSelect(
+        card.querySelector("[data-cv2field='actionRowId']"),
+        [["Action Rows", actionRows]],
+        true,
+      );
+    }
+  });
+}
+
+// ─── CV2 card builder ─────────────────────────────────────────────────────────
+
+const CV2_BADGE_LABELS = {
+  container: ["Container", "cv2-badge-container"],
+  textdisplay: ["Text Display", "cv2-badge-textdisplay"],
+  separator: ["Separator", "cv2-badge-separator"],
+  section: ["Section", "cv2-badge-section"],
+  thumbnail: ["Thumbnail", "cv2-badge-thumbnail"],
+  mediagallery: ["Media Gallery", "cv2-badge-mediagallery"],
+  mediaitem: ["Media Item", "cv2-badge-mediaitem"],
+  actionrow: ["Action Row", "cv2-badge-actionrow"],
+  buttoncv2: ["Button CV2", "cv2-badge-buttoncv2"],
+  userselect: ["User Select", "cv2-badge-userselect"],
+  roleselect: ["Role Select", "cv2-badge-roleselect"],
+  mentionable: ["Mentionable Select", "cv2-badge-mentionable"],
+};
+
+// Returns the card element (or null)
+function cv2AddCard(type, doRefresh = true) {
+  const info = CV2_BADGE_LABELS[type];
+  if (!info) return null;
+
+  // Increment per-type counter for numbering
+  if (!cv2Counters[type]) cv2Counters[type] = 0;
+  cv2Counters[type]++;
+  const num = cv2Counters[type];
+  const label = `${info[0]} #${num}`;
+
+  // Outer wrapper — same class pattern as .field-row / .button-row in Normal mode
+  const card = document.createElement("div");
+  card.className = "field-row"; // reuse existing card CSS
+  card.dataset.type = type;
+
+  // Body created first so makeHeader's collapse btn can reference it
+  const body = document.createElement("div");
+  body.className = "component-body";
+  body.innerHTML = cv2CardBody(type);
+
+  // Header — collapse + ✕ remove, using the shared makeHeader pattern
+  card.appendChild(
+    makeHeader(label, body, () => {
+      card.remove();
+      cv2RefreshAllDropdowns();
+      saveCV2State();
+    }),
+  );
+  card.appendChild(body);
+
+  document.getElementById("cv2Components").appendChild(card);
+
+  // Wire name/id inputs to refresh dropdowns on change
+  card
+    .querySelectorAll("[data-cv2field='name'],[data-cv2field='id']")
+    .forEach((el) => {
+      el.addEventListener("input", () => {
+        cv2RefreshAllDropdowns();
+        saveCV2State();
+      });
+    });
+  card.addEventListener("input", saveCV2State);
+  card.addEventListener("change", saveCV2State);
+
+  if (doRefresh) cv2RefreshAllDropdowns();
+  return card;
+}
+
+function cv2CardBody(type) {
+  // Helpers that produce the same markup as Normal mode
+  const fi = (field, placeholder, extra = "") =>
+    `<input class="form-input" data-cv2field="${field}" placeholder="${placeholder}" ${extra}>`;
+  const ta = (field, placeholder) =>
+    `<textarea class="form-input form-textarea" data-cv2field="${field}" placeholder="${placeholder}"></textarea>`;
+  const cb = (field, lbl) =>
+    `<label class="checkbox-label" style="margin:0;">
+       <input type="checkbox" class="form-checkbox" data-cv2field="${field}">
+       <span>${lbl}</span>
+     </label>`;
+  const sel = (field, options) =>
+    `<select class="form-input" data-cv2field="${field}">${options}</select>`;
+  const dynSel = (field, placeholder) =>
+    `<select class="form-input" data-cv2field="${field}">
+       <option value="">${placeholder}</option>
+     </select>`;
+  const dynSelReq = (field, placeholder = "Select an option") =>
+    `<select class="form-input" data-cv2field="${field}">
+       <option value="">${placeholder}</option>
+     </select>`;
+
+  // Row helpers — use .form-row so the existing auto-fit grid CSS applies
+  const row = (...cells) => `<div class="form-row">${cells.join("")}</div>`;
+  const rowMt = (...cells) =>
+    `<div class="form-row" style="margin-top:0.75rem;">${cells.join("")}</div>`;
+  // Inline flex bar for checkboxes (left) — mirrors the bottom bar in Normal mode
+  const cbBar = (...items) =>
+    `<div style="display:flex;gap:1.5rem;align-items:center;margin-top:0.75rem;">${items.join("")}</div>`;
+
+  switch (type) {
+    case "container":
+      return (
+        row(
+          fi("name", "Container Name (required)"),
+          fi("color", "Color (hex, optional)"),
+        ) + cbBar(cb("spoiler", "Spoiler"))
+      );
+
+    case "textdisplay":
+      return (
+        `${ta("content", "Content (required)")}` +
+        rowMt(dynSel("containerOrSection", "Select container or section"))
+      );
+
+    case "separator":
+      return (
+        row(
+          sel(
+            "spacing",
+            `<option value="">Spacing: Default</option><option value="small">Spacing: Small</option><option value="large">Spacing: Large</option>`,
+          ),
+          dynSel("container", "Select the container"),
+        ) + cbBar(cb("divider", "Show Divider Line"))
+      );
+
+    case "section":
+      return row(
+        fi("name", "Section Name (required)"),
+        dynSel("container", "Select the container"),
+      );
+
+    case "thumbnail":
+      return (
+        row(
+          fi("url", "URL (required)"),
+          fi("description", "Description (optional)"),
+        ) +
+        rowMt(dynSelReq("sectionName", "Select the section")) +
+        cbBar(cb("spoiler", "Spoiler"))
+      );
+
+    case "mediagallery":
+      return row(
+        fi("id", "Gallery ID (required)"),
+        dynSel("container", "Select the container"),
+      );
+
+    case "mediaitem":
+      return (
+        row(
+          fi("url", "URL (required)"),
+          fi("description", "Description (optional)"),
+        ) +
+        rowMt(dynSelReq("galleryId", "Select the gallery")) +
+        cbBar(cb("spoiler", "Spoiler"))
+      );
+
+    case "actionrow":
+      return row(
+        fi("id", "Action Row ID (required)"),
+        dynSel("container", "Select the container"),
+      );
+
+    case "buttoncv2":
+      return (
+        row(
+          fi("id", "ID or URL (required)"),
+          fi("label", "Label (optional)"),
+          sel(
+            "style",
+            `<option value="">Style: Default</option><option value="primary">Primary</option><option value="secondary">Secondary</option><option value="success">Success</option><option value="danger">Danger</option><option value="link">Link</option>`,
+          ),
+        ) +
+        rowMt(
+          fi("emoji", "Emoji (optional)"),
+          dynSelReq("actionRowOrSection", "Select action row or section"),
+        ) +
+        cbBar(cb("disabled", "Disabled"))
+      );
+
+    case "userselect":
+    case "roleselect":
+    case "mentionable":
+      return (
+        row(
+          fi("id", "ID (required)"),
+          fi("placeholder", "Placeholder (optional)"),
+        ) +
+        rowMt(
+          fi("min", "Min (optional)", "type='number' min='0'"),
+          fi("max", "Max (optional)", "type='number' min='0'"),
+          dynSelReq("actionRowId", "Select the action row"),
+        ) +
+        cbBar(cb("disabled", "Disabled"))
+      );
+
+    default:
+      return "";
+  }
+}
+
+// ─── CV2 generate ─────────────────────────────────────────────────────────────
+
+function cv2f(field, card) {
+  const el = card.querySelector(`[data-cv2field="${field}"]`);
+  if (!el) return "";
+  if (el.type === "checkbox") return el.checked ? "true" : "false";
+  return el.value.trim();
+}
+
+// Trim trailing empty params from an array
+function cv2Trim(parts) {
+  let last = parts.length - 1;
+  while (last > 0 && parts[last] === "") last--;
+  return parts.slice(0, last + 1);
+}
+
+function generateCV2() {
+  clearInlineErrors();
+  document.getElementById("cv2Error").textContent = "";
+  let hasErrors = false;
+
+  // Helper: show inline error after the first .form-row inside a card
+  function cv2FieldError(card, msg) {
+    const formRow = card.querySelector(".form-row");
+    if (formRow) bodyRowError(formRow, msg);
+    else {
+      const body = card.querySelector(".component-body");
+      if (body) {
+        const span = document.createElement("div");
+        span.className = "inline-error";
+        span.textContent = msg;
+        body.prepend(span);
+      }
+    }
+    hasErrors = true;
+  }
+
+  // Helper: show inline error after the .form-row containing a specific field
+  function cv2InputError(card, field, msg) {
+    const el = card.querySelector(`[data-cv2field="${field}"]`);
+    if (el) {
+      const formRow = el.closest(".form-row");
+      if (formRow) {
+        bodyRowError(formRow, msg);
+        hasErrors = true;
+        return;
+      }
+    }
+    cv2FieldError(card, msg);
+  }
+
+  const cards = Array.from(
+    document.querySelectorAll("#cv2Components [data-type]"),
+  );
+  if (cards.length === 0) {
+    document.getElementById("cv2Error").textContent =
+      "Add at least one component first.";
+    return;
+  }
+
+  // Collect names for uniqueness / cross-reference checks
+  const containerNames = new Set();
+  const sectionNames = new Set();
+  const allNames = new Set();
+
+  // First pass: uniqueness
+  cards.forEach((card) => {
+    const type = card.dataset.type;
+    if (type === "container") {
+      const name = cv2f("name", card);
+      if (!name) {
+        cv2InputError(card, "name", "Container Name is required");
+        return;
+      }
+      if (containerNames.has(name))
+        cv2InputError(card, "name", `Duplicate container name "${name}"`);
+      if (allNames.has(name))
+        cv2InputError(card, "name", `Name "${name}" clashes with a Section`);
+      containerNames.add(name);
+      allNames.add(name);
+    }
+    if (type === "section") {
+      const name = cv2f("name", card);
+      if (!name) {
+        cv2InputError(card, "name", "Section Name is required");
+        return;
+      }
+      if (sectionNames.has(name))
+        cv2InputError(card, "name", `Duplicate section name "${name}"`);
+      if (allNames.has(name))
+        cv2InputError(card, "name", `Name "${name}" clashes with a Container`);
+      sectionNames.add(name);
+      allNames.add(name);
+    }
+  });
+
+  // Second pass: per-component validation
+  cards.forEach((card) => {
+    const type = card.dataset.type;
+
+    if (type === "container") {
+      const color = cv2f("color", card);
+      if (color && !isValidHex(color))
+        cv2InputError(
+          card,
+          "color",
+          "Color must be a valid hex (e.g. #5865F2)",
+        );
+    }
+
+    if (type === "textdisplay") {
+      if (!cv2f("content", card))
+        cv2InputError(card, "content", "Content is required");
+    }
+
+    if (type === "section") {
+      const name = cv2f("name", card);
+      if (name) {
+        const hasText = cards.some(
+          (c) =>
+            c.dataset.type === "textdisplay" &&
+            cv2f("containerOrSection", c) === name,
+        );
+        if (!hasText)
+          cv2FieldError(
+            card,
+            `Section "${name}": must have at least one Text Display attached`,
+          );
+        const hasAccessory = cards.some(
+          (c) =>
+            (c.dataset.type === "thumbnail" &&
+              cv2f("sectionName", c) === name) ||
+            (c.dataset.type === "buttoncv2" &&
+              cv2f("actionRowOrSection", c) === name),
+        );
+        if (!hasAccessory)
+          cv2FieldError(
+            card,
+            `Section "${name}": must have at least one Thumbnail or Button CV2 accessory`,
+          );
+        const textCount = cards.filter(
+          (c) =>
+            c.dataset.type === "textdisplay" &&
+            cv2f("containerOrSection", c) === name,
+        ).length;
+        const thumbCount = cards.filter(
+          (c) =>
+            c.dataset.type === "thumbnail" && cv2f("sectionName", c) === name,
+        ).length;
+        if (textCount + thumbCount > 3)
+          cv2FieldError(
+            card,
+            `Section "${name}": max 3 components (Text Displays + Thumbnails)`,
+          );
+      }
+    }
+
+    if (type === "thumbnail") {
+      const url = cv2f("url", card);
+      if (!url) cv2InputError(card, "url", "URL is required");
+      else if (!isValidUrl(url))
+        cv2InputError(card, "url", "URL must start with http:// or https://");
+      if (!cv2f("sectionName", card))
+        cv2InputError(card, "sectionName", "Section Name is required");
+    }
+
+    if (type === "mediagallery") {
+      if (!cv2f("id", card))
+        cv2InputError(card, "id", "Gallery ID is required");
+    }
+
+    if (type === "mediaitem") {
+      const url = cv2f("url", card);
+      if (!url) cv2InputError(card, "url", "URL is required");
+      else if (!isValidUrl(url))
+        cv2InputError(card, "url", "URL must start with http:// or https://");
+      const gid = cv2f("galleryId", card);
+      if (!gid) cv2InputError(card, "galleryId", "Gallery ID is required");
+      else {
+        const galleryExists = cards.some(
+          (c) => c.dataset.type === "mediagallery" && cv2f("id", c) === gid,
+        );
+        if (!galleryExists)
+          cv2InputError(
+            card,
+            "galleryId",
+            `Gallery ID "${gid}" does not match any Media Gallery`,
+          );
+      }
+    }
+
+    if (type === "actionrow") {
+      const rowId = cv2f("id", card);
+      if (!rowId) {
+        cv2InputError(card, "id", "Action Row ID is required");
+        return;
+      }
+      const children = cards.filter(
+        (c) =>
+          ["buttoncv2", "userselect", "roleselect", "mentionable"].includes(
+            c.dataset.type,
+          ) &&
+          (cv2f("actionRowOrSection", c) === rowId ||
+            cv2f("actionRowId", c) === rowId),
+      );
+      if (children.length === 0)
+        cv2FieldError(
+          card,
+          `Action Row "${rowId}": must contain at least one Button or Select`,
+        );
+      const buttons = children.filter((c) => c.dataset.type === "buttoncv2");
+      const selects = children.filter((c) =>
+        ["userselect", "roleselect", "mentionable"].includes(c.dataset.type),
+      );
+      if (buttons.length > 0 && selects.length > 0)
+        cv2FieldError(
+          card,
+          `Action Row "${rowId}": cannot mix Buttons and Selects`,
+        );
+      if (selects.length > 1)
+        cv2FieldError(card, `Action Row "${rowId}": max 1 Select per row`);
+      if (buttons.length > 5)
+        cv2FieldError(card, `Action Row "${rowId}": max 5 Buttons per row`);
+    }
+
+    if (type === "buttoncv2") {
+      if (!cv2f("id", card)) cv2InputError(card, "id", "ID/URL is required");
+      if (!cv2f("label", card) && !cv2f("emoji", card))
+        cv2InputError(card, "label", "Must have a Label or Emoji");
+      if (!cv2f("actionRowOrSection", card))
+        cv2InputError(
+          card,
+          "actionRowOrSection",
+          "Action Row or Section is required",
+        );
+    }
+
+    if (["userselect", "roleselect", "mentionable"].includes(type)) {
+      if (!cv2f("id", card)) cv2InputError(card, "id", "ID is required");
+      if (!cv2f("actionRowId", card))
+        cv2InputError(card, "actionRowId", "Action Row ID is required");
+    }
+  });
+
+  if (hasErrors) {
+    const first = document.querySelector("#cv2Components .inline-error");
+    if (first) first.scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+
+  // Code generation — containers first, then rest in order
+  const containerCards = cards.filter((c) => c.dataset.type === "container");
+  const otherCards = cards.filter((c) => c.dataset.type !== "container");
+  const ordered = [...containerCards, ...otherCards];
+
+  const lines = [];
+  ordered.forEach((card) => {
+    const type = card.dataset.type;
+    let parts;
+
+    if (type === "container") {
+      parts = cv2Trim([
+        cv2f("name", card),
+        cv2f("color", card),
+        cv2f("spoiler", card) === "true" ? "true" : "",
+      ]);
+      lines.push(`$addContainer[${parts.join(";")}]`);
+    } else if (type === "textdisplay") {
+      parts = cv2Trim([
+        sanitizeInput(cv2f("content", card)),
+        cv2f("containerOrSection", card),
+      ]);
+      lines.push(`$addTextDisplay[${parts.join(";")}]`);
+    } else if (type === "separator") {
+      const divider = cv2f("divider", card) === "true" ? "true" : "";
+      const spacing = cv2f("spacing", card);
+      const container = cv2f("container", card);
+      parts = cv2Trim([divider, spacing, container]);
+      lines.push(
+        parts.length === 0 || (parts.length === 1 && parts[0] === "")
+          ? `$addSeparator[]`
+          : `$addSeparator[${parts.join(";")}]`,
+      );
+    } else if (type === "section") {
+      parts = cv2Trim([cv2f("name", card), cv2f("container", card)]);
+      lines.push(`$addSection[${parts.join(";")}]`);
+    } else if (type === "thumbnail") {
+      parts = cv2Trim([
+        cv2f("url", card),
+        sanitizeInput(cv2f("description", card)),
+        cv2f("spoiler", card) === "true" ? "true" : "",
+        cv2f("sectionName", card),
+      ]);
+      lines.push(`$addThumbnail[${parts.join(";")}]`);
+    } else if (type === "mediagallery") {
+      parts = cv2Trim([cv2f("id", card), cv2f("container", card)]);
+      lines.push(`$addMediaGallery[${parts.join(";")}]`);
+    } else if (type === "mediaitem") {
+      parts = cv2Trim([
+        cv2f("url", card),
+        sanitizeInput(cv2f("description", card)),
+        cv2f("spoiler", card) === "true" ? "true" : "",
+        cv2f("galleryId", card),
+      ]);
+      lines.push(`$addMediaGalleryItem[${parts.join(";")}]`);
+    } else if (type === "actionrow") {
+      parts = cv2Trim([cv2f("id", card), cv2f("container", card)]);
+      lines.push(`$addActionRow[${parts.join(";")}]`);
+    } else if (type === "buttoncv2") {
+      parts = cv2Trim([
+        cv2f("id", card),
+        sanitizeInput(cv2f("label", card)),
+        cv2f("style", card),
+        cv2f("disabled", card) === "true" ? "true" : "",
+        sanitizeInput(cv2f("emoji", card)),
+        cv2f("actionRowOrSection", card),
+      ]);
+      lines.push(`$addButtonCV2[${parts.join(";")}]`);
+    } else if (type === "userselect") {
+      parts = cv2Trim([
+        cv2f("id", card),
+        sanitizeInput(cv2f("placeholder", card)),
+        cv2f("min", card),
+        cv2f("max", card),
+        cv2f("disabled", card) === "true" ? "true" : "",
+        cv2f("actionRowId", card),
+      ]);
+      lines.push(`$addUserSelect[${parts.join(";")}]`);
+    } else if (type === "roleselect") {
+      parts = cv2Trim([
+        cv2f("id", card),
+        sanitizeInput(cv2f("placeholder", card)),
+        cv2f("min", card),
+        cv2f("max", card),
+        cv2f("disabled", card) === "true" ? "true" : "",
+        cv2f("actionRowId", card),
+      ]);
+      lines.push(`$addRoleSelect[${parts.join(";")}]`);
+    } else if (type === "mentionable") {
+      parts = cv2Trim([
+        cv2f("id", card),
+        sanitizeInput(cv2f("placeholder", card)),
+        cv2f("min", card),
+        cv2f("max", card),
+        cv2f("disabled", card) === "true" ? "true" : "",
+        cv2f("actionRowId", card),
+      ]);
+      lines.push(`$addMentionableSelect[${parts.join(";")}]`);
+    }
+  });
+
+  const code = lines.join("\n");
+  document.getElementById("cv2Output").textContent = code;
+  document.getElementById("cv2CharCount").textContent =
+    code.length + " characters";
+  saveCV2State();
+}

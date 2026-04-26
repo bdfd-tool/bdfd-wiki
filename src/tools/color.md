@@ -78,11 +78,25 @@
 	color: #fff;
 	font-weight: bold;
 	transition: .3s;
+	min-height: 1.5rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 #randomColorResult:hover {
 	color: #000;
 	opacity: 0.6;
 	transition: .3s;
+}
+#randomColorResult:empty {
+	background: transparent;
+	border: 2px dashed rgba(255, 255, 255, 0.3);
+}
+#randomColorResult:empty:before {
+	content: "Click Generate to create a random color";
+	color: rgba(255, 255, 255, 0.5);
+	font-weight: normal;
+	font-size: 1.1rem;
 }
 #randomColorButton {
 	outline: none;
@@ -121,6 +135,24 @@
     margin-top: -.5rem;
     display: flex;
 	text-shadow: 0px 0px 5px rgb(0 0 0 / 100%);
+	cursor: pointer;
+}
+.copy-success {
+	color: #4CAF50;
+	font-size: 0.9rem;
+	opacity: 0;
+	transition: opacity 0.3s;
+	white-space: nowrap;
+	margin-left: 0.5rem;
+	overflow: hidden;
+	max-width: 0;
+}
+.copy-success.show {
+	opacity: 1;
+	max-width: 5rem;
+}
+.clickable-color {
+	cursor: pointer;
 }
 </style>
 
@@ -138,19 +170,24 @@ Hex colors are codes that represent colors using hexadecimal values for red, gre
     	<input type="color" id="colorPicker" class="color-input" value="#000000" oninput="colorPickerChange()">
   	</div>
   	<div class="error" id="errorText"></div>
-  	<div id="validColorDisplay"><div class="valid-color" style="background:#000000">#000000</div></div>
+  	<div id="validColorDisplay" style="position: relative; display: flex; align-items: center;">
+		<div class="valid-color" style="background:#000000" onclick="copyToClipboard('#000000', 'colorCopySuccess')">#000000</div>
+		<span class="copy-success" id="colorCopySuccess">Copied!</span>
+	</div>
 </div>
 
 <div class="picker-container">
   	<h2>Random Color</h2>
   	<p>Generate a random color.</p>
-	<div class="random-result">
+	<div class="random-result" style="position: relative;">
   		<button id="randomColorButton" onclick="generateRandomColor()">Generate</button>
-  		<div id="randomColorResult" class="random-color-result"></div>
+  		<div id="randomColorResult" class="random-color-result clickable-color" onclick="copyRandomColor()"></div>
+		<span class="copy-success" id="randomCopySuccess" style="position:absolute; bottom:0.3rem; right:0.75rem; max-width:none; overflow:visible;">Copied!</span>
 	</div>
 </div>
 
 ## Functions
+
 Here are all the functions related to hex colors.
 
 ```admonish note
@@ -158,6 +195,7 @@ You can use color hex in the "Color hex" parameters.
 ```
 
 **SET**:
+
 - [`$addContainer[]`](https://wiki.botdesignerdiscord.com/nightl/bdscript/addContainer.md)
 - [`$color[]`](https://wiki.botdesignerdiscord.com/nightl/bdscript/color.md)
 - [`$colorRole[]`](https://wiki.botdesignerdiscord.com/nightl/bdscript/colorRole.md)
@@ -171,14 +209,17 @@ You can use color hex in the "Color hex" parameters.
 - [`$webhookSend[]`](https://wiki.botdesignerdiscord.com/nightl/bdscript/webhookSend.md)
 
 **GET**:
+
 - [`$getRoleColor[]`](https://wiki.botdesignerdiscord.com/nightl/bdscript/getRoleColor.md)
 - [`$roleInfo[]`](https://wiki.botdesignerdiscord.com/nightl/bdscript/roleInfo.md)
 - [`$userBannerColor[]`](https://rainb0wkey.github.io/bdfd-wiki/nightly/bdscript/userBannerColor.md)
 
 **CHECK**:
+
 - [`$isValidHex[]`](https://wiki.botdesignerdiscord.com/nightl/bdscript/isValidHex.md)
 
 ## Example
+
 ```
 $nomention
 $description[⬅️ Border color hex]
@@ -201,7 +242,6 @@ $color[#673ab7]
     description: ⬅️ Border color hex
     color: "#673ab7"
 ```
-
 
 ```admonish question title="What is this?"
 How [`$color[]`](https://wiki.botdesignerdiscord.com/nightl/bdscript/color.md) and [`$description[]`](https://wiki.botdesignerdiscord.com/nightl/bdscript/description.md) works?
