@@ -262,6 +262,18 @@ input[type="checkbox"] {
 	cursor: pointer;
 	accent-color: var(--link-color);
 }
+.copy-success {
+	color: #4CAF50;
+	font-size: 0.9rem;
+	opacity: 0;
+	transition: opacity 0.3s;
+	position: absolute;
+	bottom: 0.3rem;
+	right: 0.75rem;
+}
+.copy-success.show {
+	opacity: 1;
+}
 .total-section {
 	border-radius: var(--border-radius);
 	border: 1px solid rgba(255, 255, 255, 0.05);
@@ -269,10 +281,21 @@ input[type="checkbox"] {
 	padding: 1rem;
 	margin: 3rem 0;
 	text-align: center;
+	position: relative;
 }
 .total-section:hover > .total-value {
     color: var(--link-color);
     transition: 0.3s;
+}
+.total-value {
+	font-family: 'Consolas', monospace;
+	font-size: 3rem;
+	color: #fff;
+	font-weight: bold;
+	margin: -1rem 0;
+	word-break: break-all;
+	transition: 0.3s;
+	cursor: pointer;
 }
 .total-section h2 {
 	margin-top: 0;
@@ -722,10 +745,11 @@ input[type="checkbox"] {
             <span class="permission-value" id="value-create_invite">1</span>
         </label>
     </div>
-    <div class="total-section">
+    <div class="total-section" style="position: relative;">
         <h2 id="current-permission-value"><a class="header" href="#current-permission-value">Current Permission Value:</a></h2>
-        <div class="total-value" id="totalValue">0</div>
+        <div class="total-value" id="totalValue" onclick="copyPermissionValue()">0</div>
         <div class="hex-value" id="hexValue">0x0</div>
+        <span class="copy-success" id="permissionCopySuccess">Copied!</span>
     </div>
     <div class="input-section">
         <input type="number" id="targetValue" placeholder="Enter permission value to find combinations." min="0">
