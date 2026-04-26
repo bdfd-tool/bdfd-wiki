@@ -323,6 +323,8 @@ select.form-input option {
 	padding: 0.3rem;
 	gap: 0.3rem;
 	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+	flex-wrap: wrap;
+	justify-content: center;
 }
 .mode-btn {
 	outline: none;
@@ -353,18 +355,20 @@ select.form-input option {
 	margin-left: 0.2rem;
 	font-weight: 700;
 }
+
 </style>
 
-Here you can make embeds using the respective text inputs. (Auto escapes escapeable characters inside of text fields.)
+Here you can make embeds using the respective text inputs. (supports normal components and components v2.)
 
 ```admonish note
-Embed Builder creates Discord embeds with titles, descriptions, fields, buttons, select menus,  modals, and more.
+Embed Builder creates Discord embeds/containers with titles, descriptions, fields, buttons, select menus,  modals, and more.
 ```
 
 <div class="mode-toggle-wrapper">
   <div class="mode-toggle">
     <button class="mode-btn active" id="modeNormal">Normal Embed Builder</button>
     <button class="mode-btn" id="modeSend">Send Embed Builder</button>
+    <button class="mode-btn" id="modeCompV2">CompV2 Builder</button>
   </div>
 </div>
 <div id="normalBuilder">
@@ -518,20 +522,68 @@ Embed Builder creates Discord embeds with titles, descriptions, fields, buttons,
 </div>
 </div>
 
+<!-- ═══════════════════════════════════════════════════════════
+     COMPV2 BUILDER
+     ═══════════════════════════════════════════════════════════ -->
+<div id="compV2Builder" style="display:none;">
+<div class="picker-container">
+  <h2>CompV2 Builder</h2>
+  <p>Add components below to generate Components V2 code.</p>
+
+  <!-- Add Components card -->
+  <div class="form-group">
+    <label>Add Components</label>
+    <div class="flex-buttons" id="cv2AddButtons">
+      <button class="add-field-btn" id="cv2AddContainer">+ Container</button>
+      <button class="add-field-btn" id="cv2AddTextDisplay">+ Text Display</button>
+      <button class="add-field-btn" id="cv2AddSeparator">+ Separator</button>
+      <button class="add-field-btn" id="cv2AddSection">+ Section</button>
+      <button class="add-field-btn" id="cv2AddThumbnail">+ Thumbnail</button>
+      <button class="add-field-btn" id="cv2AddMediaGallery">+ Media Gallery</button>
+      <button class="add-field-btn" id="cv2AddMediaItem">+ Media Item</button>
+      <button class="add-field-btn" id="cv2AddActionRow">+ Action Row</button>
+      <button class="add-field-btn" id="cv2AddButtonCV2">+ Button CV2</button>
+      <button class="add-field-btn" id="cv2AddUserSelect">+ User Select</button>
+      <button class="add-field-btn" id="cv2AddRoleSelect">+ Role Select</button>
+      <button class="add-field-btn" id="cv2AddMentionable">+ Mentionable Select</button>
+    </div>
+  </div>
+
+  <!-- Dynamic component cards go here -->
+  <div id="cv2Components"></div>
+
+  <!-- Output -->
+  <div class="btn-row">
+    <button id="cv2GenerateBtn" class="generate-btn">Generate Code</button>
+    <button id="cv2CopyBtn" class="copy-btn">Copy Output</button>
+    <button id="cv2ClearBtn" class="clear-btn">Clear All</button>
+  </div>
+  <div id="cv2Output" class="output">Generated code appears here...</div>
+  <div class="char-count" id="cv2CharCount">0 characters</div>
+  <div class="error" id="cv2Error"></div>
+</div>
+
+</div>
 
 ## Functions
+
 ```admonish note
 Generated code uses standard BDFD embed functions.
 ```
-  
+
 **Core**:
+
 - [`$title[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/title.md), [`$description[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/description.md), [`$color[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/color.md), [`$image[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/image.md), [`$thumbnail[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/thumbnail.md)
 - [`$author[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/author.md), [`$footer[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/footer.md), [`$addTimestamp`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addTimestamp.md)
 - [`$addField[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addField.md), [`$addButton[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addButton.md), [`$addSelectMenuOption[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addSelectMenuOption.md)
 - [`$newModal[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/newModal.md), [`$addTextInput[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addTextInput.md)
 - [`$sendEmbedMessage[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/sendEmbedMessage.md)
+- [`$addContainer[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addContainer.md), [`$addTextDisplay[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addTextDisplay.md), [`$addSeparator[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addSeparator.md), [`$addSection[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addSection.md)
+- [`$addThumbnail[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addThumbnail.md), [`$addMediaGallery[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addMediaGallery.md), [`$addMediaGalleryItem[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addMediaGalleryItem.md)
+- [`$addActionRow[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addActionRow.md), [`$addButtonCV2[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addButtonCV2.md), [`$addUserSelect[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addUserSelect.md), [`$addRoleSelect[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addRoleSelect.md), [`$addMentionableSelect[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addMentionableSelect.md)
 
 ## Example
+
 ```
 $nomention
 $title[Hello]
