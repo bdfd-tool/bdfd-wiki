@@ -310,6 +310,49 @@ select.form-input option {
 	margin-top: 0.3rem;
 	margin-bottom: 0.25rem;
 }
+/* Mode toggle */
+.mode-toggle-wrapper {
+	display: flex;
+	justify-content: center;
+	margin: 1.5rem 0 0.5rem 0;
+}
+.mode-toggle {
+	display: flex;
+	background: hsl(0deg 0% 100% / 7%);
+	border-radius: var(--border-radius);
+	padding: 0.3rem;
+	gap: 0.3rem;
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+}
+.mode-btn {
+	outline: none;
+	touch-action: manipulation;
+	-webkit-user-select: none;
+	user-select: none;
+	padding: 0.6rem 1.4rem;
+	border: none;
+	border-radius: calc(var(--border-radius) - 2px);
+	cursor: pointer;
+	font-weight: 500;
+	font-size: 1.4rem;
+	transition: all 0.25s;
+	color: rgba(255, 255, 255, 0.55);
+	background: transparent;
+}
+.mode-btn.active {
+	background: hsl(220deg 80% 50% / 80%);
+	color: #fff;
+	box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+}
+.mode-btn:not(.active):hover {
+	color: rgba(255, 255, 255, 0.85);
+	background: hsl(0deg 0% 100% / 10%);
+}
+.required-star {
+	color: hsl(0deg 80% 60%);
+	margin-left: 0.2rem;
+	font-weight: 700;
+}
 </style>
 
 Here you can make embeds using the respective text inputs. (Auto escapes escapeable characters inside of text fields.)
@@ -318,8 +361,15 @@ Here you can make embeds using the respective text inputs. (Auto escapes escapea
 Embed Builder creates Discord embeds with titles, descriptions, fields, buttons, select menus,  modals, and more.
 ```
 
+<div class="mode-toggle-wrapper">
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="modeNormal">Normal Embed Builder</button>
+    <button class="mode-btn" id="modeSend">Send Embed Builder</button>
+  </div>
+</div>
+<div id="normalBuilder">
 <div class="picker-container">
-	<h2>Embed Builder</h2>
+	<h2>Normal Embed Builder</h2>
   	<p>Fill text input fields below to generate embed code.</p>
    
    <div class="form-group">
@@ -345,7 +395,7 @@ Embed Builder creates Discord embeds with titles, descriptions, fields, buttons,
    </div>
 
    <div class="form-group">
-     <label>Media & Style</label>
+     <label>Media &amp; Style</label>
      <div class="form-row">
        <input id="thumbnail" class="form-input" placeholder="Thumbnail URL">
        <input id="image" class="form-input" placeholder="Image URL">
@@ -384,6 +434,89 @@ Embed Builder creates Discord embeds with titles, descriptions, fields, buttons,
    <div class="char-count" id="charCount">0 characters</div>
    <div class="error" id="error"></div>
 </div>
+</div>
+<div id="sendBuilder" style="display:none;">
+<div class="picker-container">
+  <h2>Send Embed Builder</h2>
+  <p>Fill text input fields below to generate a <code>$sendEmbedMessage</code> call.</p>
+
+  <!-- Destination -->
+  <div class="form-group">
+    <label>Destination</label>
+    <div class="form-row">
+      <div style="display:flex;flex-direction:column;gap:0.4rem;">
+        <input id="s_channelId" class="form-input" placeholder="Channel ID">
+        <span style="font-size:1.1rem;color:rgba(255,255,255,0.45);">Channel ID <span class="required-star">*</span> required</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:0.4rem;">
+        <input id="s_content" class="form-input" placeholder="Content (text above embed)">
+        <span style="font-size:1.1rem;color:rgba(255,255,255,0.45);">Optional — text sent above the embed</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Author -->
+  <div class="form-group">
+    <label>Author</label>
+    <div class="form-row">
+      <input id="s_authorName" class="form-input" placeholder="Author Name">
+      <input id="s_authorIcon" class="form-input" placeholder="Author Icon URL">
+    </div>
+  </div>
+
+  <!-- Title -->
+  <div class="form-group">
+    <label>Title</label>
+    <div class="form-row">
+      <input id="s_title" class="form-input" placeholder="Title">
+      <input id="s_titleUrl" class="form-input" placeholder="Title URL">
+    </div>
+  </div>
+
+  <!-- Description -->
+  <div class="form-group">
+    <label>Description</label>
+    <textarea id="s_description" class="form-input form-textarea" placeholder="Description..."></textarea>
+  </div>
+
+  <!-- Media & Style -->
+  <div class="form-group">
+    <label>Media &amp; Style</label>
+    <div class="form-row">
+      <input id="s_thumbnail" class="form-input" placeholder="Thumbnail URL">
+      <input id="s_image" class="form-input" placeholder="Image URL">
+      <input id="s_color" class="form-input" placeholder="#ffffff" value="#7289da">
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="form-group">
+    <label>Footer</label>
+    <div class="form-row">
+      <input id="s_footer" class="form-input" placeholder="Footer Text">
+      <input id="s_footerIcon" class="form-input" placeholder="Footer Icon URL">
+    </div>
+    <label class="checkbox-label">
+      <input type="checkbox" id="s_timestamp" class="form-checkbox">
+      <span>Add Timestamp</span>
+    </label>
+    <label class="checkbox-label">
+      <input type="checkbox" id="s_returnMsgId" class="form-checkbox">
+      <span>Return Message ID</span>
+    </label>
+  </div>
+
+  <div class="btn-row">
+    <button id="s_generateBtn" class="generate-btn">Generate</button>
+    <button id="s_copyBtn" class="copy-btn">Copy Output</button>
+    <button id="s_clearBtn" class="clear-btn">Clear All</button>
+  </div>
+
+  <div id="s_output" class="output">Generated code appears here...</div>
+  <div class="char-count" id="s_charCount">0 characters</div>
+  <div class="error" id="s_error"></div>
+</div>
+</div>
 
 
 ## Functions
@@ -393,8 +526,10 @@ Generated code uses standard BDFD embed functions.
   
 **Core**:
 - [`$title[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/title.md), [`$description[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/description.md), [`$color[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/color.md), [`$image[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/image.md), [`$thumbnail[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/thumbnail.md)
+- [`$author[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/author.md), [`$footer[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/footer.md), [`$addTimestamp`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addTimestamp.md)
 - [`$addField[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addField.md), [`$addButton[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addButton.md), [`$addSelectMenuOption[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addSelectMenuOption.md)
 - [`$newModal[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/newModal.md), [`$addTextInput[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addTextInput.md)
+- [`$sendEmbedMessage[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/sendEmbedMessage.md)
 
 ## Example
 ```
