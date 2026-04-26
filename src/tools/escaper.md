@@ -146,6 +146,7 @@ Escape characters are used to treat special symbols as plain text instead of tri
 </div>
 
 ## Escaping Rules
+
 ```admonish note
 These characters are changed:
 
@@ -159,11 +160,13 @@ These characters are changed:
 ```
 
 ## Functions
+
 ```admonish note
 Use in BDFD functions like [`$sendMessage[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/sendMessage.md), [`$async[]`](https://wiki.botdesignerdiscord.com/nightly/guides/general/bds2/asyncScopes.md), embeds, etc.
 ```
 
 ## Example
+
 ```
 $nomention
 $sendMessage[[%{DOL}%Hello\\; this is pretty cool\\; right%{DOL}%\\]]
