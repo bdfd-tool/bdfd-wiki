@@ -355,6 +355,282 @@ select.form-input option {
 	margin-left: 0.2rem;
 	font-weight: 700;
 }
+/* Live Preview Styles */
+.preview-wrap {
+	background: #1e1f22;
+	border-radius: 14px;
+	padding: 1rem;
+	margin-top: 1.5rem;
+	margin-bottom: 1.5rem;
+}
+.preview-message {
+	display: flex;
+	gap: 1rem;
+	padding: 0.5rem;
+}
+.preview-avatar {
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+.preview-content {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+}
+.preview-header {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-bottom: 0.25rem;
+}
+.preview-username {
+	color: #fff;
+	font-weight: 600;
+	font-size: 1rem;
+}
+.preview-bot-badge {
+	background: #5865f2;
+	color: #fff;
+	font-size: 0.65rem;
+	font-weight: 600;
+	padding: 0.1rem 0.3rem;
+	border-radius: 3px;
+	text-transform: uppercase;
+}
+.preview-timestamp {
+	color: #949ba4;
+	font-size: 0.75rem;
+	font-weight: 500;
+}
+.preview-embed {
+	background: #2b2d31;
+	border-left: 4px solid #5865f2;
+	border-radius: 4px;
+	padding: 0.75rem 1rem;
+	width: fit-content;
+	margin-top: 0.5rem;
+	overflow: hidden;
+}
+.preview-embed-author {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-bottom: 0.5rem;
+}
+.preview-embed-author-icon {
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+}
+.preview-embed-author-name {
+	color: #fff;
+	font-size: 0.875rem;
+	font-weight: 600;
+}
+.preview-embed-title {
+	color: #00a8fc;
+	font-size: 1rem;
+	font-weight: 600;
+	margin-bottom: 0.5rem;
+	word-wrap: break-word;
+	line-height: 1.375;
+}
+.preview-embed-title:hover {
+	text-decoration: underline;
+}
+.preview-embed-description {
+	color: #dbdee1;
+	font-size: 0.875rem;
+	line-height: 1.375;
+	white-space: pre-wrap;
+	word-wrap: break-word;
+	margin-bottom: 0.5rem;
+}
+.preview-embed-fields {
+	display: grid;
+	gap: 0.5rem;
+	margin-top: 0.5rem;
+}
+.preview-embed-field {
+	min-width: 0;
+}
+.preview-embed-field-name {
+	color: #fff;
+	font-size: 0.875rem;
+	font-weight: 600;
+	margin-bottom: 0.25rem;
+}
+.preview-embed-field-value {
+	color: #dbdee1;
+	font-size: 0.875rem;
+	line-height: 1.375;
+	word-wrap: break-word;
+}
+.preview-embed-fields.has-inline {
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+.preview-embed-thumbnail {
+	float: right;
+	margin-left: 1rem;
+	margin-bottom: 0.5rem;
+	max-width: 80px;
+	max-height: 80px;
+	border-radius: 4px;
+}
+.preview-embed-image {
+	max-width: 100%;
+	max-height: 300px;
+	border-radius: 4px;
+	margin-top: 1rem;
+	object-fit: contain;
+}
+.preview-embed-footer {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-top: 0.75rem;
+	color: #949ba4;
+	font-size: 0.75rem;
+}
+.preview-embed-footer-icon {
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+}
+.preview-buttons {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin-top: 0;
+	margin-left: 0.5rem;
+	width: fit-content;
+	vertical-align: middle;
+}
+.preview-button {
+	background: #5865f2;
+	color: #fff;
+	border: none;
+	border-radius: 3px;
+	padding: 0.25rem 1rem;
+	font-size: 0.875rem;
+	font-weight: 500;
+	cursor: default;
+	min-height: 32px;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	vertical-align: middle;
+}
+.preview-button.secondary {
+	background: #4e5058;
+}
+.preview-button.success {
+	background: #248046;
+}
+.preview-button.danger {
+	background: #da373c;
+}
+.preview-button.link {
+	background: #4e5058;
+	color: #fff;
+}
+.preview-button.disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+.preview-empty {
+	color: #dbdee1;
+	font-size: 1rem;
+	font-style: normal;
+	line-height: 1.375;
+	white-space: pre-wrap;
+	word-wrap: break-word;
+	margin: 0;
+}
+.preview-container {
+	background: #2b2d31;
+	border-radius: 8px;
+	padding: 1rem;
+	margin-top: 0.5rem;
+	width: fit-content;
+	min-width: 0;
+}
+.preview-container.has-color {
+	border-left: 4px solid;
+}
+.preview-container.spoiler {
+	filter: blur(8px);
+	cursor: pointer;
+}
+.preview-text-display {
+	color: #dbdee1;
+	font-size: 0.875rem;
+	line-height: 1.375;
+	white-space: pre-wrap;
+	word-wrap: break-word;
+	margin-bottom: 0.75rem;
+}
+.preview-text-display:last-child {
+	margin-bottom: 0;
+}
+.preview-separator {
+	height: 1px;
+	background: #3f4147;
+	margin: 1rem 0;
+}
+.preview-separator.small {
+	margin: 0.5rem 0;
+}
+.preview-separator.large {
+	margin: 1.5rem 0;
+}
+.preview-separator.no-divider {
+	background: transparent;
+}
+.preview-section {
+	background: transparent;
+	border-radius: 8px;
+	padding: 1rem;
+	margin-top: 0.75rem;
+	display: flex;
+	gap: 1rem;
+	width: fit-content;
+	max-width: 100%;
+	align-items: center;
+}
+.preview-section-content {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+.preview-section-accessory {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+}
+.preview-section-thumbnail {
+	width: 80px;
+	height: 80px;
+	border-radius: 8px;
+	object-fit: cover;
+}
+.preview-media-gallery {
+	display: flex;
+	gap: 0.5rem;
+	margin-top: 0.75rem;
+	overflow-x: auto;
+}
+.preview-media-item {
+	max-width: 200px;
+	max-height: 200px;
+	border-radius: 8px;
+	object-fit: cover;
+}
 
 </style>
 
@@ -403,7 +679,7 @@ Embed Builder creates Discord embeds/containers with titles, descriptions, field
      <div class="form-row">
        <input id="thumbnail" class="form-input" placeholder="Thumbnail URL">
        <input id="image" class="form-input" placeholder="Image URL">
-       <input id="color" class="form-input" placeholder="#ffffff" value="#7289da">
+       <input id="color" class="form-input" placeholder="#ffffff">
      </div>
    </div>
 
@@ -429,9 +705,29 @@ Embed Builder creates Discord embeds/containers with titles, descriptions, field
    <div id="dynamicFields"></div>
 
    <div class="btn-row">
-     <button id="generateBtn" class="generate-btn">Generate Embed</button>
+     <button id="generateBtn" class="generate-btn">Generate</button>
      <button id="copyBtn" class="copy-btn">Copy Output</button>
      <button id="clearBtn" class="clear-btn">Clear All</button>
+   </div>
+
+   <!-- Live Preview -->
+   <div class="picker-container">
+     <h2>Live Preview</h2>
+     <div class="preview-wrap">
+       <div id="normalPreview" class="preview-message">
+         <img src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Bot" class="preview-avatar">
+         <div class="preview-content">
+           <div class="preview-header">
+             <span class="preview-username">BDFD Support</span>
+             <span class="preview-bot-badge">BOT</span>
+             <span class="preview-timestamp" id="normalTimestamp">Today at 12:00 PM</span>
+           </div>
+           <div id="normalPreviewContent">
+             <p class="preview-empty">Fill in the form to see a preview…</p>
+           </div>
+         </div>
+       </div>
+     </div>
    </div>
 
    <div id="output" class="output">Generated code appears here...</div>
@@ -489,7 +785,7 @@ Embed Builder creates Discord embeds/containers with titles, descriptions, field
     <div class="form-row">
       <input id="s_thumbnail" class="form-input" placeholder="Thumbnail URL">
       <input id="s_image" class="form-input" placeholder="Image URL">
-      <input id="s_color" class="form-input" placeholder="#ffffff" value="#7289da">
+      <input id="s_color" class="form-input" placeholder="#ffffff">
     </div>
   </div>
 
@@ -514,6 +810,26 @@ Embed Builder creates Discord embeds/containers with titles, descriptions, field
     <button id="s_generateBtn" class="generate-btn">Generate</button>
     <button id="s_copyBtn" class="copy-btn">Copy Output</button>
     <button id="s_clearBtn" class="clear-btn">Clear All</button>
+  </div>
+
+  <!-- Live Preview -->
+  <div class="picker-container">
+    <h2>Live Preview</h2>
+    <div class="preview-wrap">
+      <div id="sendPreview" class="preview-message">
+        <img src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Bot" class="preview-avatar">
+        <div class="preview-content">
+          <div class="preview-header">
+            <span class="preview-username">BDFD Support</span>
+            <span class="preview-bot-badge">BOT</span>
+            <span class="preview-timestamp" id="sendTimestamp">Today at 12:00 PM</span>
+          </div>
+          <div id="sendPreviewContent">
+            <p class="preview-empty">Fill in the form to see a preview…</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div id="s_output" class="output">Generated code appears here...</div>
@@ -543,6 +859,7 @@ Embed Builder creates Discord embeds/containers with titles, descriptions, field
       <button class="add-field-btn" id="cv2AddMediaItem">+ Media Item</button>
       <button class="add-field-btn" id="cv2AddActionRow">+ Action Row</button>
       <button class="add-field-btn" id="cv2AddButtonCV2">+ Button CV2</button>
+      <button class="add-field-btn" id="cv2AddStringSelect">+ String Select</button>
       <button class="add-field-btn" id="cv2AddUserSelect">+ User Select</button>
       <button class="add-field-btn" id="cv2AddRoleSelect">+ Role Select</button>
       <button class="add-field-btn" id="cv2AddMentionable">+ Mentionable Select</button>
@@ -554,10 +871,31 @@ Embed Builder creates Discord embeds/containers with titles, descriptions, field
 
   <!-- Output -->
   <div class="btn-row">
-    <button id="cv2GenerateBtn" class="generate-btn">Generate Code</button>
+    <button id="cv2GenerateBtn" class="generate-btn">Generate</button>
     <button id="cv2CopyBtn" class="copy-btn">Copy Output</button>
     <button id="cv2ClearBtn" class="clear-btn">Clear All</button>
   </div>
+
+  <!-- Live Preview -->
+  <div class="picker-container">
+    <h2>Live Preview</h2>
+    <div class="preview-wrap">
+      <div id="cv2Preview" class="preview-message">
+        <img src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Bot" class="preview-avatar">
+        <div class="preview-content">
+          <div class="preview-header">
+            <span class="preview-username">BDFD Support</span>
+            <span class="preview-bot-badge">BOT</span>
+            <span class="preview-timestamp" id="cv2Timestamp">Today at 12:00 PM</span>
+          </div>
+          <div id="cv2PreviewContent">
+            <p class="preview-empty">Add components to see a preview…</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="cv2Output" class="output">Generated code appears here...</div>
   <div class="char-count" id="cv2CharCount">0 characters</div>
   <div class="error" id="cv2Error"></div>
@@ -580,7 +918,7 @@ Generated code uses standard BDFD embed functions.
 - [`$sendEmbedMessage[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/sendEmbedMessage.md)
 - [`$addContainer[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addContainer.md), [`$addTextDisplay[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addTextDisplay.md), [`$addSeparator[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addSeparator.md), [`$addSection[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addSection.md)
 - [`$addThumbnail[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addThumbnail.md), [`$addMediaGallery[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addMediaGallery.md), [`$addMediaGalleryItem[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addMediaGalleryItem.md)
-- [`$addActionRow[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addActionRow.md), [`$addButtonCV2[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addButtonCV2.md), [`$addUserSelect[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addUserSelect.md), [`$addRoleSelect[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addRoleSelect.md), [`$addMentionableSelect[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addMentionableSelect.md)
+- [`$addActionRow[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addActionRow.md), [`$addButtonCV2[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addButtonCV2.md), [`$addStringSelect[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addStringSelect.md), [`$addStringSelectOption[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addStringSelectOption.md), [`$addUserSelect[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addUserSelect.md), [`$addRoleSelect[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addRoleSelect.md), [`$addMentionableSelect[]`](https://wiki.botdesignerdiscord.com/nightly/bdscript/addMentionableSelect.md)
 
 ## Example
 
