@@ -1,4 +1,5 @@
 # Text Editor
+
 Here you can use the basic editor features to write codes more conveniently.
 
 <style>
@@ -38,7 +39,7 @@ Here you can use the basic editor features to write codes more conveniently.
 	margin-bottom: -1rem;
 }
 
-#editor, #name {
+#name {
 	width: 96%;
 	font-size: 1.5rem;
 	min-height: 1.3rem;
@@ -48,17 +49,18 @@ Here you can use the basic editor features to write codes more conveniently.
 	color: #fff;
 	background: hsl(0deg 0% 100% / 7%);
 	padding: 7px;
-	font-size: 1.5rem;
 	margin: -2rem auto;
 	display: block;
 	outline: none;
 }
 
 #editor {
-	height: 40rem;
-	resize: vertical;
+	width: 96%;
+	margin: -2rem auto;
+	display: block;
+	border-radius: 10px;
+	overflow: hidden;
 }
-
 #name {
 	white-space: nowrap;
 	overflow: auto;
@@ -83,6 +85,11 @@ Here you can use the basic editor features to write codes more conveniently.
 	padding: 10px;
 	border-radius: 10px;
 }
+
+#text-editorui[open] #highlightedText {
+	display: block;
+}
+
 
 #text-editorui p {
 	user-select: none;
@@ -143,6 +150,7 @@ Here you can use the basic editor features to write codes more conveniently.
 }
 
 #highlightedText {
+	display: none;
 	overflow-x: auto;
 	color: #fff;
 	font-size: 1.5rem;
@@ -152,6 +160,7 @@ Here you can use the basic editor features to write codes more conveniently.
 	height: 100%;
 	word-break: break-all;
 	background: hsl(0deg 0% 100% / 7%);
+	margin-top: 1rem;
 }
 
 #highlightedText p {
@@ -308,6 +317,10 @@ Here you can use the basic editor features to write codes more conveniently.
 
 .scriptdiv button:nth-of-type(2) {
   	right: 0.8rem;
+}
+
+.scriptdiv button:nth-of-type(3) {
+	right: 8rem;
 }
 
 #error-message {
@@ -519,40 +532,421 @@ Here you can use the basic editor features to write codes more conveniently.
 }
 
 #autocomplete {
-    white-space: normal;
-    width: auto;
-    margin-bottom: 3rem;
-    margin-top: -1.75rem;
-    display: block !important;
-	border-radius: 10px;
-	background: var(--card-bg);
-	border: 1px solid rgba(255, 255, 255, 0.05);
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    border-radius: 8px;
+    background: var(--card-bg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    padding: 4px 0;
 }
 
-#autocomplete span {
-    display: block;
+#autocomplete > span {
+    display: flex;
     color: var(--text-secondary);
-	margin-top: .5rem;
-    margin-bottom: .5rem;
-	margin-left: .5rem;
-	margin-right: 1rem;
+	margin-top: .25rem;
+    margin-bottom: .25rem;
+	margin-left: .25rem;
+	margin-right: .25rem;
     cursor: pointer;
-    padding: .5rem;
+    padding: .5rem .75rem;
     width: 100%;
     transition: 0.2s;
+    border-radius: 6px;
+    box-sizing: border-box;
 }
 
-#autocomplete span.selected, #autocomplete span:hover {
-	border-left-color: var(--link-color);
-	border-left-width: 2.5px;
-	border-top-left-radius: 0;
-	border-bottom-left-radius: 0;
-	border-left-style: solid;
-	transition: 0.2s;
+#autocomplete > span.selected, #autocomplete > span:hover {
+    background: hsl(0deg 0% 100% / 8%);
+    border-radius: 6px;
+}
+
+/* Fullscreen editor */
+#editor-fullscreen-wrapper {
+    position: relative;
+}
+#editor-statusbar {
+    display: none; /* hidden in normal mode */
+    align-items: center;
+    gap: 1rem;
+    padding: 0.3rem 0.75rem;
+    background: hsl(0deg 0% 100% / 5%);
+    font-size: 1rem;
+    color: hsl(0deg 0% 100% / 50%);
+    font-family: monospace;
+    user-select: none;
+    flex-shrink: 0;
+}
+#editor-statusbar span {
+    flex-shrink: 0;
+}
+#editor-close-btn {
+    display: none;
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 9999;
+    background: hsl(0deg 0% 100% / 10%);
+    border: 1px solid hsl(0deg 0% 100% / 20%);
+    color: #fff;
+    border-radius: 8px;
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.2rem;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+#editor-close-btn:hover {
+    background: hsl(0deg 0% 100% / 20%);
+}
+.editor-fullscreen {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 9998 !important;
+    background: #1a1b1e !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column;
+}
+.editor-fullscreen #editor {
+    flex: 1;
+    border-radius: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    min-height: 0;
+}
+.editor-fullscreen .cm-editor {
+    height: 100% !important;
+    border-radius: 0 !important;
+}
+.editor-fullscreen #editor-statusbar {
+    display: flex;
+    border-radius: 0;
+}
+
+/* VSCode-style scrollbar */
+.cm-scroller::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+.cm-scroller::-webkit-scrollbar-track {
+    background: hsl(0deg 0% 100% / 3%);
+    border-radius: 0 10px 10px 0;
+}
+.cm-scroller::-webkit-scrollbar-thumb {
+    background: hsl(0deg 0% 100% / 20%);
+    border-radius: 5px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+    min-height: 40px;
+}
+.cm-scroller::-webkit-scrollbar-thumb:hover {
+    background: hsl(0deg 0% 100% / 35%);
+    background-clip: content-box;
+}
+.cm-scroller::-webkit-scrollbar-corner {
+    background: transparent;
+}
+.cm-editor {
+    height: 40rem;
+    border-radius: 10px;
+    font-size: 1rem;
+}
+.cm-editor.cm-focused {
+    outline: none;
+}
+.cm-tooltip-autocomplete {
+    background: var(--card-bg) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5) !important;
+    max-width: min(380px, 96vw) !important;
+    box-sizing: border-box !important;
+}
+.cm-tooltip-autocomplete ul li {
+    color: var(--text-secondary) !important;
+    padding: 0.3rem 0.75rem !important;
+    font-size: 1.35rem !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+}
+.cm-tooltip-autocomplete ul li[aria-selected] {
+    background: hsl(0deg 0% 100% / 8%) !important;
+    color: #fff !important;
+}
+.cm-completionLabel {
+    color: #fff;
+    flex-shrink: 0;
+}
+.cm-completionDetail {
+    color: rgba(255,255,255,0.35);
+    font-style: normal;
+    font-size: 0.8em;
+    margin-left: 0.25rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 180px;
+}
+.cm-completionIcon {
+    display: none !important;
 }
 </style>
 
 <script src="../theme/autocomplete.js" defer></script>
+
+<script type="module">
+import { EditorView, keymap, lineNumbers, ViewPlugin, Decoration } from 'https://esm.sh/@codemirror/view@6';
+import { EditorState, Compartment, RangeSetBuilder } from 'https://esm.sh/@codemirror/state@6';
+import { defaultKeymap, history, historyKeymap } from 'https://esm.sh/@codemirror/commands@6';
+import { autocompletion, completeFromList, closeBrackets } from 'https://esm.sh/@codemirror/autocomplete@6';
+import { indentOnInput, bracketMatching } from 'https://esm.sh/@codemirror/language@6';
+
+const base = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+let completions = [];
+try {
+  const functionsData = await fetch(base + '../tools/functions_tag.json').then(r => r.json());
+  completions = (functionsData.functions || []).map(entry => ({
+    label: entry.tag.includes('[') ? entry.tag.substring(0, entry.tag.indexOf('[')) : entry.tag,
+    apply: entry.tag,
+    detail: entry.description || '',
+    type: 'function',
+  }));
+} catch(e) { console.error('Failed to load functions_tag.json', e); }
+
+// ── Decoration-based syntax highlighter ──────────────────────────────────────
+let currentTheme = {
+  defaultText: '#dbdee1',
+  fallback:    '#a78bfa',
+  bracket:     '#f472b6',
+  semicolon:   '#fb923c',
+  number:      '#34d399',
+  functions:   {},
+};
+
+function uint32ToHex(n) {
+  const r = (n >> 16) & 0xff;
+  const g = (n >> 8)  & 0xff;
+  const b =  n        & 0xff;
+  return '#' + r.toString(16).padStart(2,'0') + g.toString(16).padStart(2,'0') + b.toString(16).padStart(2,'0');
+}
+
+function applyThemeJson(json) {
+  if (json.defaultTextHighlight?.color != null) currentTheme.defaultText = uint32ToHex(json.defaultTextHighlight.color);
+  if (json.fallbackHighlight?.color != null)    currentTheme.fallback    = uint32ToHex(json.fallbackHighlight.color);
+  if (json.bracketHighlight?.color != null)     currentTheme.bracket     = uint32ToHex(json.bracketHighlight.color);
+  if (json.semicolonHighlight?.color != null)   currentTheme.semicolon   = uint32ToHex(json.semicolonHighlight.color);
+  if (json.numberHighlight?.color != null)      currentTheme.number      = uint32ToHex(json.numberHighlight.color);
+  currentTheme.functions = {};
+  if (json.functionsHighlights) {
+    for (const [name, val] of Object.entries(json.functionsHighlights)) {
+      if (val?.color != null) currentTheme.functions[name] = uint32ToHex(val.color);
+    }
+  }
+}
+
+// Restore saved theme on load
+const HIGHLIGHT_KEY = 'bdfd_highlight_theme';
+const savedHighlight = localStorage.getItem(HIGHLIGHT_KEY);
+if (savedHighlight) {
+  try { applyThemeJson(JSON.parse(savedHighlight)); } catch(e) {}
+}
+
+// Mark cache keyed by color
+const markCache = {};
+function getMark(color) {
+  if (!markCache[color]) markCache[color] = Decoration.mark({ attributes: { style: `color:${color}` } });
+  return markCache[color];
+}
+
+function buildDecorations(view) {
+  const builder = new RangeSetBuilder();
+  const doc = view.state.doc;
+  const re = /(\$[a-zA-Z]+)|([\[\]])|(;)|(\d+)/g;
+  for (const { from, to } of view.visibleRanges) {
+    const text = doc.sliceString(from, to);
+    let m;
+    re.lastIndex = 0;
+    while ((m = re.exec(text)) !== null) {
+      const start = from + m.index;
+      const end   = start + m[0].length;
+      let color;
+      if      (m[1]) color = currentTheme.functions[m[1]] ?? currentTheme.fallback;
+      else if (m[2]) color = currentTheme.bracket;
+      else if (m[3]) color = currentTheme.semicolon;
+      else if (m[4]) color = currentTheme.number;
+      if (color) builder.add(start, end, getMark(color));
+    }
+  }
+  return builder.finish();
+}
+
+const bdscriptPlugin = ViewPlugin.fromClass(class {
+  constructor(view) { this.decorations = buildDecorations(view); }
+  update(update) {
+    if (update.docChanged || update.viewportChanged) this.decorations = buildDecorations(update.view);
+  }
+}, { decorations: v => v.decorations });
+
+function refreshHighlight() {
+  Object.keys(markCache).forEach(k => delete markCache[k]);
+  // Reconfigure the compartment with a fresh instance of the plugin to force full rebuild
+  window.cmEditor.dispatch({
+    effects: highlightPluginCompartment.reconfigure(bdscriptPlugin),
+  });
+}
+
+const autocompleteCompartment = new Compartment();
+const lineWrappingCompartment = new Compartment();
+const lineNumbersCompartment  = new Compartment();
+const highlightPluginCompartment = new Compartment();
+
+const updateListener = EditorView.updateListener.of((update) => {
+  if (update.docChanged) {
+    localStorage.setItem('bdfd_editor_content', update.state.doc.toString());
+    updateStats();
+    checkBrackets();
+    bdscript2();
+  }
+  if (update.docChanged || update.selectionSet) {
+    const state  = update.state;
+    const cursor = state.selection.main.head;
+    const line   = state.doc.lineAt(cursor);
+    const col    = cursor - line.from + 1;
+    const total  = state.doc.lines;
+    const cursorEl = document.getElementById('editor-cursor-pos');
+    const linesEl  = document.getElementById('editor-total-lines');
+    const charsEl  = document.getElementById('editor-char-count');
+    if (cursorEl) cursorEl.textContent = `Ln ${line.number}, Col ${col}`;
+    if (linesEl)  linesEl.textContent  = `${total} line${total !== 1 ? 's' : ''}`;
+    if (charsEl)  charsEl.textContent  = `${state.doc.length} chars`;
+  }
+});
+
+window.cmEditor = new EditorView({
+  state: EditorState.create({
+    doc: '',
+    extensions: [
+      history(),
+      keymap.of([...defaultKeymap, ...historyKeymap]),
+      lineNumbersCompartment.of(lineNumbers()),
+      indentOnInput(),
+      bracketMatching(),
+      closeBrackets(),
+      highlightPluginCompartment.of(bdscriptPlugin),
+      autocompleteCompartment.of(autocompletion({
+        override: [completeFromList(completions)],
+        activateOnTyping: true,
+      })),
+      lineWrappingCompartment.of([]),
+      EditorView.theme({
+        '&': { backgroundColor: 'hsl(0deg 0% 100% / 7%)', color: '#dbdee1', borderRadius: '10px', height: '40rem' },
+        '.cm-scroller': { fontFamily: 'monospace', fontSize: '1.5rem', overflow: 'auto' },
+        '.cm-content': { caretColor: '#fff' },
+        '.cm-gutters': { backgroundColor: 'hsl(0deg 0% 100% / 5%)', color: 'hsl(0deg 0% 100% / 30%)', border: 'none', borderRadius: '10px 0 0 10px' },
+        '.cm-cursor': { borderLeftColor: '#fff' },
+        '.cm-selectionBackground': { backgroundColor: 'hsl(0deg 0% 100% / 15%) !important' },
+        '&.cm-focused .cm-selectionBackground': { backgroundColor: 'hsl(0deg 0% 100% / 20%) !important' },
+        '.cm-activeLine': { backgroundColor: 'hsl(0deg 0% 100% / 3%)' },
+        '.cm-activeLineGutter': { backgroundColor: 'hsl(0deg 0% 100% / 5%)' },
+      }, { dark: true }),
+      updateListener,
+    ],
+  }),
+  parent: document.getElementById('editor'),
+});
+
+// Expose compartments for settings toggles
+window._cmCompartments = { autocompleteCompartment, lineWrappingCompartment, lineNumbersCompartment, highlightPluginCompartment };
+window._cmExtensions = { autocompletion, completeFromList, completions, lineNumbers, EditorView };
+window._bdscriptPlugin = bdscriptPlugin;
+
+// Restore saved editor content
+const saved = localStorage.getItem('bdfd_editor_content');
+if (saved) {
+  window.cmEditor.dispatch({ changes: { from: 0, to: window.cmEditor.state.doc.length, insert: saved } });
+  updateStats();
+  checkBrackets();
+  bdscript2();
+}
+
+// Fullscreen toggle
+window.toggleEditorFullscreen = function() {
+  const wrapper  = document.getElementById('editor-fullscreen-wrapper');
+  const closeBtn = document.getElementById('editor-close-btn');
+  const isFullscreen = wrapper.classList.toggle('editor-fullscreen');
+  closeBtn.style.display = isFullscreen ? 'flex' : 'none';
+  window.cmEditor.requestMeasure();
+};
+
+// Highlight theme modal
+window.openHighlightModal = function() {
+  const s = localStorage.getItem(HIGHLIGHT_KEY);
+  if (s) document.getElementById('highlightThemeInput').value = s;
+  document.getElementById('highlightThemeModal').style.display = 'flex';
+};
+window.closeHighlightModal = function() {
+  document.getElementById('highlightThemeModal').style.display = 'none';
+  document.getElementById('highlightThemeError').textContent = '';
+};
+window.applyHighlightTheme = function() {
+  const input = document.getElementById('highlightThemeInput');
+  const errEl = document.getElementById('highlightThemeError');
+  errEl.style.color = '';
+  errEl.textContent = '';
+  if (!input.value.trim()) {
+    errEl.textContent = 'Please paste a JSON theme first.';
+    return;
+  }
+  let parsed;
+  try { parsed = JSON.parse(input.value.trim()); }
+  catch(e) { errEl.textContent = 'Invalid JSON — check your theme format.'; return; }
+  applyThemeJson(parsed);
+  // Clear mark cache and force full re-render by scrolling viewport
+  Object.keys(markCache).forEach(k => delete markCache[k]);
+  window.cmEditor.dispatch({
+    effects: highlightPluginCompartment.reconfigure(
+      ViewPlugin.fromClass(class {
+        constructor(view) { this.decorations = buildDecorations(view); }
+        update(update) {
+          if (update.docChanged || update.viewportChanged) this.decorations = buildDecorations(update.view);
+        }
+      }, { decorations: v => v.decorations })
+    ),
+  });
+  localStorage.setItem(HIGHLIGHT_KEY, input.value.trim());
+  errEl.style.color = 'hsl(120deg 60% 50%)';
+  errEl.textContent = '✓ Theme applied!';
+  setTimeout(() => { errEl.textContent = ''; errEl.style.color = ''; window.closeHighlightModal(); }, 1200);
+};
+window.resetHighlightTheme = function() {
+  localStorage.removeItem(HIGHLIGHT_KEY);
+  currentTheme = { defaultText: '#dbdee1', fallback: '#a78bfa', bracket: '#f472b6', semicolon: '#fb923c', number: '#34d399', functions: {} };
+  Object.keys(markCache).forEach(k => delete markCache[k]);
+  window.cmEditor.dispatch({
+    effects: highlightPluginCompartment.reconfigure(
+      ViewPlugin.fromClass(class {
+        constructor(view) { this.decorations = buildDecorations(view); }
+        update(update) {
+          if (update.docChanged || update.viewportChanged) this.decorations = buildDecorations(update.view);
+        }
+      }, { decorations: v => v.decorations })
+    ),
+  });
+  document.getElementById('highlightThemeInput').value = '';
+  window.closeHighlightModal();
+};
+</script>
 
 <div id="stats-container">
 	<p>Words: <span id="wordCount">0</span></p>
@@ -583,11 +977,19 @@ Here you can use the basic editor features to write codes more conveniently.
 		</select>
 	</div>
 	<p id="error-message"></p>
-	<p id="autocomplete"></p>
 	<div class="scriptdiv">
-		<textarea id="editor" oninput="updateStats(); checkBrackets(); bdscript2()"></textarea><br>
-	 	<button class="fa fa-regular fa-paste clip-button" onclick="copyCodeText() title="Copy" aria-label="Copy"></button>
+		<div id="editor-fullscreen-wrapper">
+			<div id="editor"></div>
+			<div id="editor-statusbar">
+				<span id="editor-cursor-pos">Ln 1, Col 1</span>
+				<span id="editor-total-lines">1 line</span>
+				<span id="editor-char-count">0 chars</span>
+			</div>
+		</div>
+	 	<button class="fa fa-regular fa-paste clip-button" onclick="copyCodeText()" title="Copy" aria-label="Copy"></button>
 	  	<button class="fa fa-file-word-o" onclick="saveFile()" title="Save as file" aria-label="Save as file"></button>
+	  	<button class="fa fa-expand" onclick="toggleEditorFullscreen()" title="Fullscreen" aria-label="Fullscreen" id="editor-fullscreen-btn"></button>
+	  	<button id="editor-close-btn" onclick="toggleEditorFullscreen()" title="Exit fullscreen" aria-label="Exit fullscreen">✕</button>
 	</div>
 </div>
 
@@ -608,9 +1010,8 @@ Here you can use the basic editor features to write codes more conveniently.
 	<button onclick="replaceOneText()">Replace</button>
 	<button onclick="replaceText()">Replace all</button>
 	<p><i class="fa fa-info" aria-hidden="true"></i> Regex is supported</p>
+	<div id="highlightedText"></div>
 </details>
-
-<div id="highlightedText"></div>
 
 <details id="settings">
   <summary>Settings</summary>
@@ -658,10 +1059,33 @@ Here you can use the basic editor features to write codes more conveniently.
     <p>Number each line.</p>
     <button onclick="changeCodeLines()" id="changeCodeLines">Line Number</button>
   </div>
+  <hr>
+  <div class="setting-item">
+    <p>Import a custom code highlight theme from <a href="../tools/highlighter.html" target="_blank">Code Highlighter</a>.</p>
+    <button onclick="openHighlightModal()" id="importHighlightButton">Import Theme</button>
+  </div>
+  <hr>
   <div class="setting-item">
     <p id="internetConnection">Loading...</p>
   </div>
 </details>
+
+<!-- Highlight theme import modal -->
+<div id="highlightThemeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;align-items:center;justify-content:center;">
+  <div style="background:var(--card-bg);border-radius:12px;padding:1.5rem;width:90%;max-width:500px;box-shadow:0 10px 40px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.08);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <strong style="font-size:1.1rem;">Import Highlight Theme</strong>
+      <button onclick="closeHighlightModal()" style="background:none;border:none;color:rgba(255,255,255,0.6);font-size:1.3rem;cursor:pointer;padding:0;line-height:1;">✕</button>
+    </div>
+    <p style="font-size:1rem;color:rgba(255,255,255,0.7);margin-bottom:0.75rem;">Generate a theme using the <a href="../tools/highlighter.html" target="_blank" style="color:var(--link-color);">Code Highlighter</a>, then paste the JSON here.</p>
+    <textarea id="highlightThemeInput" rows="6" placeholder='{"defaultTextHighlight":{"color":4288341353,"style":0},"functionsHighlights":{"$if":{"color":4288905212,"style":0}}}' style="width:100%;box-sizing:border-box;padding:0.75rem;background:hsl(0deg 0% 100% / 7%);border:1px solid hsl(0deg 0% 100% / 15%);border-radius:8px;color:#fff;font-size:1rem;font-family:inherit;resize:vertical;outline:none;"></textarea>
+    <div id="highlightThemeError" style="color:var(--error);font-size:1rem;min-height:1.2rem;margin-top:0.4rem;"></div>
+    <div style="display:flex;gap:0.75rem;margin-top:1rem;justify-content:flex-end;">
+      <button onclick="resetHighlightTheme()" style="padding:0.5rem 1.25rem;background:linear-gradient(to left, rgb(255 255 255 / 40%), rgb(192 1 1 / 75%));border:none;border-radius:8px;color:#fff;cursor:pointer;font-size:1rem;">Reset</button>
+      <button onclick="applyHighlightTheme()" style="padding:0.5rem 1.25rem;background:linear-gradient(to right, rgb(255 255 255 / 40%), rgb(1 192 36 / 75%));border:none;border-radius:8px;color:#fff;cursor:pointer;font-size:1rem;">Apply</button>
+    </div>
+  </div>
+</div>
 
 <details id="tips">
   <summary>Tips</summary>
