@@ -210,7 +210,7 @@ function editInputHeight() {
 
 // Editor tools
 function updateStats() {
-  const text = document.getElementById("editor").value;
+  const text = window.cmEditor ? window.cmEditor.state.doc.toString() : "";
 
   const words = text
     .trim()
@@ -254,16 +254,19 @@ function updateStats() {
 function replaceText() {
   const searchText = document.getElementById("searchText").value;
   const replaceText = document.getElementById("replaceText").value;
-  const editor = document.getElementById("editor");
-
+  if (!window.cmEditor) return;
+  const current = window.cmEditor.state.doc.toString();
+  let updated;
   try {
     const regex = new RegExp(searchText, "g");
-    editor.value = editor.value.replace(regex, replaceText);
+    updated = current.replace(regex, replaceText);
   } catch (e) {
     const escapedSearchText = searchText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    editor.value = editor.value.replaceAll(escapedSearchText, replaceText);
+    updated = current.replaceAll(escapedSearchText, replaceText);
   }
-
+  window.cmEditor.dispatch({
+    changes: { from: 0, to: window.cmEditor.state.doc.length, insert: updated },
+  });
   updateStats();
   checkBrackets();
 }
@@ -271,16 +274,19 @@ function replaceText() {
 function replaceOneText() {
   const searchText = document.getElementById("searchText").value;
   const replaceText = document.getElementById("replaceText").value;
-  const editor = document.getElementById("editor");
-
+  if (!window.cmEditor) return;
+  const current = window.cmEditor.state.doc.toString();
+  let updated;
   try {
     const regex = new RegExp(searchText);
-    editor.value = editor.value.replace(regex, replaceText);
+    updated = current.replace(regex, replaceText);
   } catch (e) {
     const escapedSearchText = searchText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    editor.value = editor.value.replace(escapedSearchText, replaceText);
+    updated = current.replace(escapedSearchText, replaceText);
   }
-
+  window.cmEditor.dispatch({
+    changes: { from: 0, to: window.cmEditor.state.doc.length, insert: updated },
+  });
   updateStats();
   checkBrackets();
 }
@@ -401,7 +407,7 @@ function updateCloseAllButton() {
 }
 
 function checkBrackets() {
-  const text = document.getElementById("editor").value;
+  const text = window.cmEditor ? window.cmEditor.state.doc.toString() : "";
   const textBytes = new TextEncoder().encode(text).length;
   let dollarCount = 0;
   let openBrackets = 0;
@@ -472,7 +478,10 @@ function editorFindCase() {
 
 function toggleHighlight() {
   const highlightedTextDiv = document.getElementById("highlightedText");
-  const text = document.getElementById("editor").value;
+  // Auto-open the Editor details panel when Find is triggered
+  const editorUi = document.getElementById("text-editorui");
+  if (editorUi && !editorUi.open) editorUi.open = true;
+  const text = window.cmEditor ? window.cmEditor.state.doc.toString() : "";
   const searchText = document.getElementById("searchText").value;
   let highlighted = text;
   let matches = 0;
@@ -674,12 +683,39 @@ function toggleHighlight() {
 function textHighlighting() {
   highlightEnabled = !highlightEnabled;
   callButtonChange("findHighlightingButton", highlightEnabled);
+  // Toggle the CodeMirror syntax highlight plugin
+  if (window.cmEditor && window._cmCompartments) {
+    const { highlightPluginCompartment } = window._cmCompartments;
+    if (highlightPluginCompartment) {
+      if (highlightEnabled) {
+        // Restore — dispatch a reconfigure with the current plugin
+        window.cmEditor.dispatch({
+          effects: highlightPluginCompartment.reconfigure(
+            window._bdscriptPlugin,
+          ),
+        });
+      } else {
+        window.cmEditor.dispatch({
+          effects: highlightPluginCompartment.reconfigure([]),
+        });
+      }
+    }
+  }
   toggleHighlight();
 }
 
 function changeCodeLines() {
   lineNumberingEnabled = !lineNumberingEnabled;
   callButtonChange("changeCodeLines", lineNumberingEnabled);
+  if (window.cmEditor && window._cmCompartments) {
+    const { lineNumbersCompartment } = window._cmCompartments;
+    const { lineNumbers } = window._cmExtensions;
+    window.cmEditor.dispatch({
+      effects: lineNumbersCompartment.reconfigure(
+        lineNumberingEnabled ? lineNumbers() : [],
+      ),
+    });
+  }
   toggleHighlight();
 }
 
@@ -718,15 +754,8 @@ function getRelativeTime(date) {
 }
 
 function copyCodeText() {
-  const textarea = document.getElementById("editor");
-
-  if (!textarea) {
-    console.error("Textarea element with ID 'editor' not found.");
-    return;
-  }
-
-  const code = textarea.value;
-
+  if (!window.cmEditor) return;
+  const code = window.cmEditor.state.doc.toString();
   navigator.clipboard
     .writeText(code)
     .then(() => {
@@ -740,19 +769,17 @@ function copyCodeText() {
 function saveFile() {
   const fileName = document.getElementById("name").value;
   const finalFileName = fileName || "bdfdwikieditor";
-  const fileContent = document.getElementById("editor").value;
-
+  const fileContent = window.cmEditor
+    ? window.cmEditor.state.doc.toString()
+    : "";
   const blob = new Blob([fileContent], { type: "text/plain" });
   const a = document.createElement("a");
   const url = URL.createObjectURL(blob);
-
   a.href = url;
   a.download = finalFileName + ".txt";
-
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-
   URL.revokeObjectURL(url);
 }
 
@@ -880,10 +907,11 @@ function typeScript() {
 }
 
 function bdscript2() {
-  const editor = document.getElementById("editor");
   const languageSelect = document.querySelector('select[name="language"]');
   const scriptLanguage = languageSelect.value;
-  const scriptText = editor.value;
+  const scriptText = window.cmEditor
+    ? window.cmEditor.state.doc.toString()
+    : "";
 
   const bdscript2Keywords = [
     "$try",
@@ -923,27 +951,49 @@ function editorAreaButtons() {
   callButtonChange("usefulButtonsButton", isHidden);
 }
 
+let brokeLinksEnabled = false;
+let savedHrefs = [];
+
 function editorBrokeLinks() {
+  brokeLinksEnabled = !brokeLinksEnabled;
   const links = document.getElementsByTagName("a");
 
-  for (let i = 0; i < links.length; i++) {
-    links[i].setAttribute("href", "#");
-    links[i].style.pointerEvents = "none";
+  if (brokeLinksEnabled) {
+    savedHrefs = [];
+    for (let i = 0; i < links.length; i++) {
+      savedHrefs.push(links[i].getAttribute("href"));
+      links[i].setAttribute("href", "#");
+      links[i].style.pointerEvents = "none";
+    }
+  } else {
+    for (let i = 0; i < links.length; i++) {
+      if (savedHrefs[i] != null) links[i].setAttribute("href", savedHrefs[i]);
+      links[i].style.pointerEvents = "";
+    }
+    savedHrefs = [];
   }
 
-  callButtonChange("brokeLinksButton", "true");
+  callButtonChange("brokeLinksButton", brokeLinksEnabled);
 }
 
 let isWrappingEnabled = false;
 
 function editorWrapping() {
-  const textarea = document.getElementById("editor");
   const findcode = document.getElementById("highlightedText");
   isWrappingEnabled = !isWrappingEnabled;
 
-  textarea.style.whiteSpace = isWrappingEnabled ? "pre-wrap" : "nowrap";
-  findcode.style.whiteSpace = isWrappingEnabled ? "pre-wrap" : "nowrap";
+  if (window.cmEditor && window._cmCompartments) {
+    const { lineWrappingCompartment } = window._cmCompartments;
+    const { EditorView } = window._cmExtensions;
+    window.cmEditor.dispatch({
+      effects: lineWrappingCompartment.reconfigure(
+        isWrappingEnabled ? EditorView.lineWrapping : [],
+      ),
+    });
+  }
 
+  if (findcode)
+    findcode.style.whiteSpace = isWrappingEnabled ? "pre-wrap" : "nowrap";
   callButtonChange("textWrappingButton", isWrappingEnabled);
 }
 
@@ -1863,18 +1913,18 @@ function updateCurrentTime() {
 
   const timeInfo = getCurrentTimeInTimezone();
   const showCopied = currentTimeCopiedCounter > 0;
-  
-  currentTimeEl.innerHTML = `${timeInfo.dateString}<br><span class="clickable-timestamp" onclick="copyCurrentTimestamp(${timeInfo.unixTime})" style="cursor:pointer;">${timeInfo.unixTime}</span><span class="copy-success ${showCopied ? 'show' : ''}" id="currentTimeCopySuccess" style="position:absolute; bottom:0.3rem; right:0.75rem; max-width:none; overflow:visible;">Copied!</span><br><span style="font-size: 0.9em;">${timeInfo.timezone}</span>`;
-  
+
+  currentTimeEl.innerHTML = `${timeInfo.dateString}<br><span class="clickable-timestamp" onclick="copyCurrentTimestamp(${timeInfo.unixTime})" style="cursor:pointer;">${timeInfo.unixTime}</span><span class="copy-success ${showCopied ? "show" : ""}" id="currentTimeCopySuccess" style="position:absolute; bottom:0.3rem; right:0.75rem; max-width:none; overflow:visible;">Copied!</span><br><span style="font-size: 0.9em;">${timeInfo.timezone}</span>`;
+
   if (currentTimeCopiedCounter > 0) {
     currentTimeCopiedCounter--;
   }
-  
+
   updateTimerDisplay();
 }
 
 function copyCurrentTimestamp(timestamp) {
-  copyToClipboard(timestamp.toString(), 'currentTimeCopySuccess');
+  copyToClipboard(timestamp.toString(), "currentTimeCopySuccess");
   currentTimeCopiedCounter = 3; // Show for 5 updates (5 seconds)
 }
 
