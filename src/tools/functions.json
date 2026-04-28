@@ -498,6 +498,17 @@
     "$webhookSend[]",
     "$webhookTitle[]",
     "$webhookUsername[]",
-    "$year"
+    "$year",
+    "$onJoined[]",
+    "$onLeave[]",
+    "$onMessageDelete[]",
+    "$onBanAdd[]",
+    "$onBanRemove[]",
+    "$alwaysReply",
+    "$messageContains[]",
+    "$awaitedCommand[]",
+    "$reaction[]",
+    "$onInteraction[]",
+    "$onInteraction"
   ]
 }
