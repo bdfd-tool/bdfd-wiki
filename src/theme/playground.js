@@ -330,8 +330,10 @@ function updateErrorVisibility() {
   }
 }
 
-function callError(message, type = "error", unique = false) {
+function callError(message, type = "error", unique = false, origin = "code") {
   const errorMessageElement = document.getElementById("error-message");
+
+  if (!errorMessageElement) return;
 
   if (unique) {
     for (let i = 0; i < errorMessageElement.children.length; i++) {
@@ -344,6 +346,7 @@ function callError(message, type = "error", unique = false) {
   let closeAllButton = document.getElementById("close-all-errors-btn");
   const errorDiv = document.createElement("div");
   errorDiv.style.display = "block";
+  errorDiv.dataset.origin = origin;
 
   if (type === "warn") {
     errorDiv.style.color = "orange";
@@ -406,28 +409,79 @@ function updateCloseAllButton() {
   }
 }
 
-function checkBrackets() {
-  const text = window.cmEditor ? window.cmEditor.state.doc.toString() : "";
+let editorValidationTimer;
+let lastEditorValidationText = "";
+let bdscriptApiCache = new Map();
+let bdscriptApiAbortController = null;
+
+function scheduleBdscriptValidation(text) {
+  if (lastEditorValidationText === text) return;
+  lastEditorValidationText = text;
+
+  clearTimeout(editorValidationTimer);
+  editorValidationTimer = setTimeout(() => validateBdscriptCode(text), 500);
+}
+
+function formatValidationError(error, isWarning = false) {
+  if (!error) return "";
+  if (typeof error === "string") return error;
+  if (error.plain) return error.message || "";
+
+  const functionName = error.function || error.functionName || "BDScript";
+  const line = error.line != null ? error.line : "?";
+  const message = error.message || "";
+  if (isWarning) {
+    return `Warning: ${message}`;
+  }
+  return `Error: ${functionName} at line ${line}: ${message}`;
+}
+
+function displayValidationErrors(errors, origin = "code") {
+  const errorMessageElement = document.getElementById("error-message");
+  if (!errorMessageElement) return;
+
+  if (!Array.isArray(errors) || errors.length === 0) return;
+
+  errors.slice(0, 5).forEach((error) => {
+    if (!error) return;
+    callValidationError(error, true, origin);
+  });
+}
+
+function callValidationError(error, unique = false, origin = "code") {
+  const isWarning = error.type === "warn";
+  callError(
+    formatValidationError(error, isWarning),
+    isWarning ? "warn" : "error",
+    unique,
+    origin,
+  );
+}
+
+function deleteValidationError(error) {
+  deleteError(formatValidationError(error, error.type === "warn"));
+}
+
+function clearValidationErrors(origin = "code") {
+  const errorMessageElement = document.getElementById("error-message");
+  if (!errorMessageElement) return;
+
+  for (let i = errorMessageElement.children.length - 1; i >= 0; i--) {
+    const child = errorMessageElement.children[i];
+    if (child.dataset && child.dataset.origin === origin) {
+      child.remove();
+    }
+  }
+}
+
+function runLocalBracketValidation(text) {
   const textBytes = new TextEncoder().encode(text).length;
   let dollarCount = 0;
   let openBrackets = 0;
   let closeBrackets = 0;
   let lastOpenBracketLine = -1;
-
-  const errorMessageElement = document.getElementById("error-message");
-  errorMessageElement.innerHTML = "";
-  errorMessageElement.style.color = "black";
-
-  if (textBytes > 65536) {
-    callError("Error: Text exceeds allowed size (65536 bytes).");
-  }
-
-  if (text.indexOf("$") === -1 && text.length > 2000) {
-    callError(
-      "Warning: Character limit exceeded (2000) for messages without functions.",
-      "warn",
-    );
-  }
+  let warnings = [];
+  let errors = [];
 
   const lines = text.split("\n");
   for (let i = 0; i < lines.length; i++) {
@@ -442,12 +496,160 @@ function checkBrackets() {
         lastOpenBracketLine = i + 1;
         if (j + 1 < line.length && line[j + 1] === "]") {
           if (openBrackets <= dollarCount) {
-            callError(
-              `Warning: Empty brackets [] detected on line ${i + 1}.`,
-              "warn",
-            );
+            warnings.push({
+              function: "BDScript",
+              line: i + 1,
+              message: "Empty brackets [] detected.",
+              type: "warn",
+            });
           }
         }
+      } else if (line[j] === "]" && (j === 0 || line[j - 1] !== "\\")) {
+        closeBrackets++;
+      }
+    }
+  }
+
+  if (textBytes > 65536) {
+    warnings.unshift({
+      function: "BDScript",
+      line: "?",
+      message: "Text exceeds allowed size (65536 bytes).",
+      type: "warn",
+    });
+  }
+
+  if (text.indexOf("$") === -1 && text.length > 2000) {
+    warnings.unshift({
+      function: "BDScript",
+      line: "?",
+      message: "Character limit exceeded (2000) for messages without functions.",
+      type: "warn",
+    });
+  }
+
+  return { openBrackets, closeBrackets, warnings, errors };
+
+  if (text.indexOf("$") === -1 && text.length > 2000) {
+    warnings.unshift({
+      function: "BDScript",
+      line: "?",
+      message: "Character limit exceeded (2000) for messages without functions.",
+      type: "warn",
+    });
+  }
+
+  return { openBrackets, closeBrackets, warnings, errors };
+}
+
+function runBdscript2Validation(text) {
+  const languageSelect = document.querySelector('select[name="language"]');
+  const scriptLanguage = languageSelect ? languageSelect.value : "";
+  const bdscript2Keywords = [
+    "$try",
+    "$endtry",
+    "$catch",
+    "$async",
+    "$endasync",
+    "$eval",
+    "$error",
+    "$optOff",
+    "$elseif",
+    "$stop",
+    "$var",
+  ];
+
+  const firstKeyword = bdscript2Keywords.find((keyword) => text.includes(keyword));
+  if (!firstKeyword || scriptLanguage === "bds2") {
+    return [];
+  }
+
+  return [
+    {
+      message: `Function ${firstKeyword} is only available in BDScript2`,
+      plain: true,
+    },
+  ];
+}
+
+function validateBdscriptCode(text) {
+  if (!text.trim()) return;
+
+  clearValidationErrors("local");
+  clearValidationErrors("api");
+
+  const localResult = runLocalBracketValidation(text);
+  const bdscript2Errors = runBdscript2Validation(text);
+
+  displayValidationErrors(localResult.warnings, "local");
+  displayValidationErrors(localResult.errors, "local");
+  displayValidationErrors(bdscript2Errors, "local");
+
+  const hasLocalErrors = localResult.errors.length > 0 || bdscript2Errors.length > 0;
+  if (hasLocalErrors) {
+    return;
+  }
+
+  if (bdscriptApiCache.has(text)) {
+    const cachedErrors = bdscriptApiCache.get(text);
+    displayValidationErrors(cachedErrors, "api");
+    return;
+  }
+
+  if (bdscriptApiAbortController) {
+    bdscriptApiAbortController.abort();
+  }
+  bdscriptApiAbortController = new AbortController();
+
+  fetch("https://api.bdtools.xyz/bdscript-checker", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code: text }),
+    signal: bdscriptApiAbortController.signal,
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`BDScript checker returned ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      const errors = Array.isArray(data?.errors) ? data.errors.slice(0, 5) : [];
+      bdscriptApiCache.set(text, errors);
+      displayValidationErrors(errors, "api");
+    })
+    .catch((error) => {
+      if (error.name === "AbortError") return;
+      console.error("BDScript checker failed", error);
+      callError("API call failed", "error", false, "api");
+    });
+}
+
+function checkBrackets() {
+  const text = window.cmEditor ? window.cmEditor.state.doc.toString() : "";
+  const textBytes = new TextEncoder().encode(text).length;
+  let dollarCount = 0;
+  let openBrackets = 0;
+  let closeBrackets = 0;
+
+  if (textBytes > 65536) {
+    // Leave validation to validateBdscriptCode so that API errors show after local errors.
+  }
+
+  if (text.indexOf("$") === -1 && text.length > 2000) {
+    // Leave validation to validateBdscriptCode so that API errors show after local errors.
+  }
+
+  const lines = text.split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    for (let j = 0; j < line.length; j++) {
+      if (line[j] === "$") {
+        if (j + 1 < line.length && /[a-zA-Z]/.test(line[j + 1])) {
+          dollarCount++;
+        }
+      } else if (line[j] === "[") {
+        openBrackets++;
       } else if (line[j] === "]" && (j === 0 || line[j - 1] !== "\\")) {
         closeBrackets++;
       }
@@ -457,13 +659,7 @@ function checkBrackets() {
   document.getElementById("openCount").textContent = openBrackets;
   document.getElementById("closeCount").textContent = closeBrackets;
 
-  if (openBrackets <= dollarCount) {
-    if (closeBrackets < openBrackets) {
-      callError(
-        `Error: Not all open brackets are closed. Last opened on line ${lastOpenBracketLine}.`,
-      );
-    }
-  }
+  scheduleBdscriptValidation(text);
 }
 
 let caseSensitive = false;
@@ -809,18 +1005,20 @@ function typeScript() {
   const nameLabel = document.getElementById("scriptType");
 
   const errorMessages = {
-    empty: "Error: Name cannot be empty.",
-    regex: "Error: Slash command name must contain only English letters.",
-    length: "Error: Slash command name exceeds 32 characters.",
-    invalidCallback: "Error: Invalid callback name.",
-    slashStart: "Error: Slash command name must start with /",
+    empty: "Name cannot be empty.",
+    regex: "Slash command name must contain only English letters.",
+    length: "Slash command name exceeds 32 characters.",
+    invalidCallback: "Invalid callback name.",
+    slashStart: "Slash command name must start with /",
   };
 
-  deleteError(errorMessages.regex);
-  deleteError(errorMessages.empty);
-  deleteError(errorMessages.length);
-  deleteError(errorMessages.invalidCallback);
-  deleteError(errorMessages.slashStart);
+  const formatSlashError = (message) => `Error: ${message}`;
+
+  deleteError(formatSlashError(errorMessages.regex));
+  deleteError(formatSlashError(errorMessages.empty));
+  deleteError(formatSlashError(errorMessages.length));
+  deleteError(formatSlashError(errorMessages.invalidCallback));
+  deleteError(formatSlashError(errorMessages.slashStart));
 
   const callbackKeywords = [
     "$awaitedCommand",
@@ -838,12 +1036,12 @@ function typeScript() {
 
   if (selectValue !== "file") {
     if (!nameInputVal) {
-      callError(errorMessages.empty, "error", true);
+      callError(formatSlashError(errorMessages.empty), "error", true);
     } else {
-      deleteError(errorMessages.empty);
+      deleteError(formatSlashError(errorMessages.empty));
     }
   } else {
-    deleteError(errorMessages.empty);
+    deleteError(formatSlashError(errorMessages.empty));
   }
 
   let commandType = "Command";
@@ -853,30 +1051,34 @@ function typeScript() {
   } else if (selectValue === "callback") {
     commandType = " • Callback";
     if (!callbackKeywords.some((keyword) => nameInputVal.startsWith(keyword))) {
-      callError(errorMessages.invalidCallback, "error", true);
+      callError(
+        formatSlashError(errorMessages.invalidCallback),
+        "error",
+        true,
+      );
     } else {
-      deleteError(errorMessages.invalidCallback);
+      deleteError(formatSlashError(errorMessages.invalidCallback));
     }
   } else if (selectValue === "slash") {
     commandType = " • Slash Command";
 
     if (!nameInputVal.startsWith("/")) {
-      callError(errorMessages.slashStart, "error", true);
+      callError(formatSlashError(errorMessages.slashStart), "error", true);
     } else {
-      deleteError(errorMessages.slashStart);
+      deleteError(formatSlashError(errorMessages.slashStart));
 
       const nameToCheck = nameInputVal.substring(1);
       const regex = /^[a-z-]+$/;
 
       if (!regex.test(nameToCheck)) {
-        callError(errorMessages.regex, "error", true);
+        callError(formatSlashError(errorMessages.regex), "error", true);
       } else {
-        deleteError(errorMessages.regex);
+        deleteError(formatSlashError(errorMessages.regex));
       }
       if (nameInputVal.length > 32) {
-        callError(errorMessages.length, "error", true);
+        callError(formatSlashError(errorMessages.length), "error", true);
       } else {
-        deleteError(errorMessages.length);
+        deleteError(formatSlashError(errorMessages.length));
       }
     }
   } else if (selectValue === "auto") {
@@ -888,14 +1090,14 @@ function typeScript() {
     } else if (nameInputVal.startsWith("/")) {
       commandType = " • Slash Command";
       if (!regex.test(nameToCheck)) {
-        callError(errorMessages.regex, "error", true);
+        callError(formatSlashError(errorMessages.regex), "error", true);
       } else {
-        deleteError(errorMessages.regex);
+        deleteError(formatSlashError(errorMessages.regex));
       }
       if (nameInputVal.length > 32) {
-        callError(errorMessages.length, "error", true);
+        callError(formatSlashError(errorMessages.length), "error", true);
       } else {
-        deleteError(errorMessages.length);
+        deleteError(formatSlashError(errorMessages.length));
       }
     } else {
       commandType = " • Command";
@@ -931,13 +1133,23 @@ function bdscript2() {
     scriptText.includes(keyword),
   );
 
+  bdscript2Keywords.forEach((keyword) => {
+    deleteError(`Error: Function ${keyword} is only available in BDScript2`);
+  });
+
   if (containsBDScript2Keywords && scriptLanguage !== "bds2") {
     const firstKeyword = bdscript2Keywords.find((keyword) =>
       scriptText.includes(keyword),
     );
-    callError(`Function ${firstKeyword} is only available in BDScript2`);
+    callError(
+      `Function ${firstKeyword} is only available in BDScript2`,
+      "error",
+      true,
+      "local",
+    );
   }
 }
+
 
 function editorAreaButtons() {
   const scriptDiv = document.querySelector(".scriptdiv");
